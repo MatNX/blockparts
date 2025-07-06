@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/weathered_cut_copper_slab_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/weathered_cut_copper_slab_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/weathered_cut_copper_slab_z"
+    }
+  }
+}
