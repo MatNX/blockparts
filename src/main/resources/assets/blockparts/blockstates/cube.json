@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/cube_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/cube_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/cube_z"
+    }
+  }
+}
