@@ -3,6 +3,10 @@ package com.matnx.blockparts;
 import com.matnx.blockparts.part.PartBlock;
 import com.matnx.blockparts.statestore.StateStoreBlock;
 import com.matnx.blockparts.statestore.StateStoreBlockEntity;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.*;
 
 import net.minecraft.core.registries.Registries;
@@ -23,6 +27,7 @@ public class BlockParts
     public static final String MODID = "blockparts";
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
 
     public static final DeferredBlock<Block> STATE_STORE_BLOCK = BLOCKS.registerBlock("state_store_block", StateStoreBlock::new, BlockBehaviour.Properties.of());
@@ -69,9 +74,11 @@ public class BlockParts
             for (Map.Entry<String, int[]> entry : PART_SIZES.entrySet()) {
                 int[] s = entry.getValue();
                 String name = material + "_" + entry.getKey();
-                PART_BLOCKS.put(name, BLOCKS.registerBlock(name,
+                DeferredBlock<Block> block = BLOCKS.registerBlock(name,
                         (props) -> new PartBlock(s[0], s[1], s[2], props),
-                        BlockBehaviour.Properties.of()));
+                        BlockBehaviour.Properties.of());
+                PART_BLOCKS.put(name, block);
+                ITEMS.registerSimpleBlockItem(name, block, new Item.Properties());
             }
         }
     }
@@ -79,6 +86,7 @@ public class BlockParts
     public BlockParts(IEventBus modEventBus, ModContainer modContainer)
     {
         BLOCKS.register(modEventBus);
+        ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
     }
 }
