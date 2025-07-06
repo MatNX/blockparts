@@ -15,42 +15,38 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * when placed on a negative facing side.
  */
 public class TileBlock extends PartBlock {
-    public static final EnumProperty<Direction.AxisDirection> AXIS_DIR =
-            EnumProperty.create("axis_dir", Direction.AxisDirection.class);
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
 
     public TileBlock(int sizeX, int sizeY, int sizeZ, BlockBehaviour.Properties props) {
         super(sizeX, sizeY, sizeZ, props);
         this.registerDefaultState(this.stateDefinition.any()
-                .setValue(BlockStateProperties.AXIS, DEFAULT_AXIS)
-                .setValue(AXIS_DIR, Direction.AxisDirection.POSITIVE));
+                .setValue(FACING, Direction.NORTH));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(AXIS_DIR);
+        builder.add(FACING);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState()
-                .setValue(BlockStateProperties.AXIS, context.getClickedFace().getAxis())
-                .setValue(AXIS_DIR, context.getClickedFace().getAxisDirection());
+                .setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
     protected VoxelShape shapeFor(BlockState state) {
-        Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
-        Direction.AxisDirection dir = state.getValue(AXIS_DIR);
+        Direction facing = state.getValue(FACING);
         int x = sizeX;
         int y = sizeY;
         int z = sizeZ;
-        if (axis == Direction.Axis.X) {
+        if (facing.getAxis() == Direction.Axis.X) {
             x = sizeY; y = sizeX; z = sizeZ;
-        } else if (axis == Direction.Axis.Z) {
+        } else if (facing.getAxis() == Direction.Axis.Z) {
             x = sizeX; y = sizeZ; z = sizeY;
         }
-        if (dir == Direction.AxisDirection.NEGATIVE) {
+        if (facing.getAxisDirection() == Direction.AxisDirection.NEGATIVE) {
             if (x >= y && x >= z) {
                 int t = y; y = z; z = t;
             } else if (y >= x && y >= z) {
