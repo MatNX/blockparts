@@ -21,5 +21,7 @@ https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
 
 Additional Resources: 
 ==========
-Community Documentation: https://docs.neoforged.net/  
+Community Documentation: https://docs.neoforged.net/
 NeoForged Discord: https://discord.neoforged.net/
+
+A helper script `generate_all_parts.py` has been added to create JSON models for all part variants. Run it from the repository root after cloning to generate the resources.

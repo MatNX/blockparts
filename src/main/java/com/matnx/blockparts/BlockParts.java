@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.function.Supplier;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
@@ -26,14 +28,53 @@ public class BlockParts
     public static final DeferredBlock<Block> STATE_STORE_BLOCK = BLOCKS.registerBlock("state_store_block", StateStoreBlock::new, BlockBehaviour.Properties.of());
     public static final Supplier<BlockEntityType<StateStoreBlockEntity>> STATE_STORE_BLOCK_ENTITY = BLOCK_ENTITIES.register("state_store_block_entity", () -> new BlockEntityType<>(StateStoreBlockEntity::new, STATE_STORE_BLOCK.get()));
 
-    public static final DeferredBlock<Block> BRICK = BLOCKS.registerBlock("brick", () -> new PartBlock(8, 16, 8, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
-    public static final DeferredBlock<Block> CUBE = BLOCKS.registerBlock("cube", () -> new PartBlock(8, 8, 8, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
-    public static final DeferredBlock<Block> SMALL_SLAB = BLOCKS.registerBlock("small_slab", () -> new PartBlock(8, 4, 8, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
-    public static final DeferredBlock<Block> SMALL_BRICK = BLOCKS.registerBlock("small_brick", () -> new PartBlock(4, 8, 4, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
-    public static final DeferredBlock<Block> SMALL_CUBE = BLOCKS.registerBlock("small_cube", () -> new PartBlock(4, 4, 4, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
-    public static final DeferredBlock<Block> PLATE = BLOCKS.registerBlock("plate", () -> new PartBlock(16, 4, 16, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
-    public static final DeferredBlock<Block> TILE = BLOCKS.registerBlock("tile", () -> new PartBlock(16, 4, 8, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
-    public static final DeferredBlock<Block> ROD = BLOCKS.registerBlock("rod", () -> new PartBlock(4, 16, 4, BlockBehaviour.Properties.of()), BlockBehaviour.Properties.of());
+    private static final Map<String, int[]> PART_SIZES = Map.of(
+            "brick", new int[]{8, 16, 8},
+            "cube", new int[]{8, 8, 8},
+            "small_slab", new int[]{8, 4, 8},
+            "small_brick", new int[]{4, 8, 4},
+            "small_cube", new int[]{4, 4, 4},
+            "plate", new int[]{16, 4, 16},
+            "tile", new int[]{16, 4, 8},
+            "rod", new int[]{4, 16, 4}
+    );
+
+    private static final String[] SLAB_VARIANTS = {
+            "oak_slab", "spruce_slab", "birch_slab", "jungle_slab",
+            "acacia_slab", "dark_oak_slab", "mangrove_slab", "cherry_slab",
+            "bamboo_slab", "bamboo_mosaic_slab", "crimson_slab", "warped_slab",
+            "stone_slab", "smooth_stone_slab", "cobblestone_slab", "mossy_cobblestone_slab",
+            "stone_brick_slab", "mossy_stone_brick_slab", "brick_slab", "sandstone_slab",
+            "cut_sandstone_slab", "smooth_sandstone_slab", "red_sandstone_slab",
+            "cut_red_sandstone_slab", "smooth_red_sandstone_slab", "purpur_slab",
+            "prismarine_slab", "prismarine_brick_slab", "dark_prismarine_slab",
+            "nether_brick_slab", "red_nether_brick_slab", "quartz_slab", "smooth_quartz_slab",
+            "polished_granite_slab", "granite_slab", "polished_diorite_slab", "diorite_slab",
+            "polished_andesite_slab", "andesite_slab", "copper_slab", "exposed_copper_slab",
+            "weathered_copper_slab", "oxidized_copper_slab", "waxed_copper_slab",
+            "waxed_exposed_copper_slab", "waxed_weathered_copper_slab", "waxed_oxidized_copper_slab",
+            "cut_copper_slab", "exposed_cut_copper_slab", "weathered_cut_copper_slab",
+            "oxidized_cut_copper_slab", "waxed_cut_copper_slab", "waxed_exposed_cut_copper_slab",
+            "waxed_weathered_cut_copper_slab", "waxed_oxidized_cut_copper_slab",
+            "blackstone_slab", "polished_blackstone_slab", "polished_blackstone_brick_slab",
+            "petrified_oak_slab", "mud_brick_slab", "deepslate_brick_slab",
+            "deepslate_tile_slab", "cobbled_deepslate_slab", "polished_deepslate_slab"
+    };
+
+    public static final Map<String, DeferredBlock<Block>> PART_BLOCKS = new HashMap<>();
+
+    static {
+        for (String slab : SLAB_VARIANTS) {
+            String material = slab.endsWith("_slab") ? slab.substring(0, slab.length() - 5) : slab;
+            for (Map.Entry<String, int[]> entry : PART_SIZES.entrySet()) {
+                int[] s = entry.getValue();
+                String name = material + "_" + entry.getKey();
+                PART_BLOCKS.put(name, BLOCKS.registerBlock(name,
+                        () -> new PartBlock(s[0], s[1], s[2], BlockBehaviour.Properties.of()),
+                        BlockBehaviour.Properties.of()));
+            }
+        }
+    }
 
     public BlockParts(IEventBus modEventBus, ModContainer modContainer)
     {

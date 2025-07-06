@@ -2,12 +2,5 @@
   "itemGroup.blockparts": "Example Mod Tab",
   "block.blockparts.example_block": "Example Block",
   "item.blockparts.example_item": "Example Item",
-  "block.blockparts.brick": "Brick",
-  "block.blockparts.cube": "Cube",
-  "block.blockparts.small_slab": "Small Slab",
-  "block.blockparts.small_brick": "Small Brick",
-  "block.blockparts.small_cube": "Small Cube",
-  "block.blockparts.plate": "Plate",
-  "block.blockparts.tile": "Tile",
-  "block.blockparts.rod": "Rod"
+
 }
