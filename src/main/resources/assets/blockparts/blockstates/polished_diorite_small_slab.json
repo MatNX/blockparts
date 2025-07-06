@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/polished_diorite_small_slab_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/polished_diorite_small_slab_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/polished_diorite_small_slab_z"
+    }
+  }
+}

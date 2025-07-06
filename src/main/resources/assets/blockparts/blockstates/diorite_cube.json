@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/diorite_cube_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/diorite_cube_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/diorite_cube_z"
+    }
+  }
+}

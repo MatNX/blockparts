@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/small_brick_z",
+  "textures": {
+    "particle": "minecraft:block/stone",
+    "down": "minecraft:block/stone",
+    "up": "minecraft:block/stone",
+    "north": "minecraft:block/stone",
+    "south": "minecraft:block/stone",
+    "west": "minecraft:block/stone",
+    "east": "minecraft:block/stone"
+  }
+}

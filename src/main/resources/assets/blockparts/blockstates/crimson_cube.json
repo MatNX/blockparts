@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/crimson_cube_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/crimson_cube_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/crimson_cube_z"
+    }
+  }
+}

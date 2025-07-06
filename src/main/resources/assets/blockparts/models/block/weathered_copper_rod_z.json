@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/rod_z",
+  "textures": {
+    "particle": "minecraft:block/weathered_copper",
+    "down": "minecraft:block/weathered_copper",
+    "up": "minecraft:block/weathered_copper",
+    "north": "minecraft:block/weathered_copper",
+    "south": "minecraft:block/weathered_copper",
+    "west": "minecraft:block/weathered_copper",
+    "east": "minecraft:block/weathered_copper"
+  }
+}

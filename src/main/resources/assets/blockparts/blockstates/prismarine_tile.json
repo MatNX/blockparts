@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/prismarine_tile_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/prismarine_tile_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/prismarine_tile_z"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/smooth_sandstone_brick_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/smooth_sandstone_brick_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/smooth_sandstone_brick_z"
+    }
+  }
+}

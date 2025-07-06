@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/weathered_cut_copper_small_cube_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/weathered_cut_copper_small_cube_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/weathered_cut_copper_small_cube_z"
+    }
+  }
+}

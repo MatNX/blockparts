@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/small_brick_z",
+  "textures": {
+    "particle": "minecraft:block/nether_bricks",
+    "down": "minecraft:block/nether_bricks",
+    "up": "minecraft:block/nether_bricks",
+    "north": "minecraft:block/nether_bricks",
+    "south": "minecraft:block/nether_bricks",
+    "west": "minecraft:block/nether_bricks",
+    "east": "minecraft:block/nether_bricks"
+  }
+}

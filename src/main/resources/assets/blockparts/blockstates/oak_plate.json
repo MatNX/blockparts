@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/oak_plate_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/oak_plate_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/oak_plate_z"
+    }
+  }
+}

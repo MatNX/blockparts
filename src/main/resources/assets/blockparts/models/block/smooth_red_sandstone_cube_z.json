@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/cube_z",
+  "textures": {
+    "particle": "minecraft:block/smooth_red_sandstone",
+    "down": "minecraft:block/smooth_red_sandstone",
+    "up": "minecraft:block/smooth_red_sandstone",
+    "north": "minecraft:block/smooth_red_sandstone",
+    "south": "minecraft:block/smooth_red_sandstone",
+    "west": "minecraft:block/smooth_red_sandstone",
+    "east": "minecraft:block/smooth_red_sandstone"
+  }
+}

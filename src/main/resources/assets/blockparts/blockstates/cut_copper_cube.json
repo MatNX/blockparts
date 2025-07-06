@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/cut_copper_cube_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/cut_copper_cube_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/cut_copper_cube_z"
+    }
+  }
+}

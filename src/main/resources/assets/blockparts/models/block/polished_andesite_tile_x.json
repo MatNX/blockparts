@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_x",
+  "textures": {
+    "particle": "minecraft:block/polished_andesite",
+    "down": "minecraft:block/polished_andesite",
+    "up": "minecraft:block/polished_andesite",
+    "north": "minecraft:block/polished_andesite",
+    "south": "minecraft:block/polished_andesite",
+    "west": "minecraft:block/polished_andesite",
+    "east": "minecraft:block/polished_andesite"
+  }
+}

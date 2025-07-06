@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/cube_z",
+  "textures": {
+    "particle": "minecraft:block/waxed_weathered_cut_copper",
+    "down": "minecraft:block/waxed_weathered_cut_copper",
+    "up": "minecraft:block/waxed_weathered_cut_copper",
+    "north": "minecraft:block/waxed_weathered_cut_copper",
+    "south": "minecraft:block/waxed_weathered_cut_copper",
+    "west": "minecraft:block/waxed_weathered_cut_copper",
+    "east": "minecraft:block/waxed_weathered_cut_copper"
+  }
+}

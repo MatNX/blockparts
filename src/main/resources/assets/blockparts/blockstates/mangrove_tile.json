@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/mangrove_tile_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/mangrove_tile_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/mangrove_tile_z"
+    }
+  }
+}

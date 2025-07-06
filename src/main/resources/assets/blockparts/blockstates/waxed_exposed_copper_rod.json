@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/waxed_exposed_copper_rod_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/waxed_exposed_copper_rod_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/waxed_exposed_copper_rod_z"
+    }
+  }
+}

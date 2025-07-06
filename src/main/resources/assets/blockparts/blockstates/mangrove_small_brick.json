@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/mangrove_small_brick_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/mangrove_small_brick_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/mangrove_small_brick_z"
+    }
+  }
+}

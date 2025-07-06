@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_z",
+  "textures": {
+    "particle": "minecraft:block/granite",
+    "down": "minecraft:block/granite",
+    "up": "minecraft:block/granite",
+    "north": "minecraft:block/granite",
+    "south": "minecraft:block/granite",
+    "west": "minecraft:block/granite",
+    "east": "minecraft:block/granite"
+  }
+}

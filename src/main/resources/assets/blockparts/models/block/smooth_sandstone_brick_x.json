@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/brick_x",
+  "textures": {
+    "particle": "minecraft:block/smooth_sandstone",
+    "down": "minecraft:block/smooth_sandstone",
+    "up": "minecraft:block/smooth_sandstone",
+    "north": "minecraft:block/smooth_sandstone",
+    "south": "minecraft:block/smooth_sandstone",
+    "west": "minecraft:block/smooth_sandstone",
+    "east": "minecraft:block/smooth_sandstone"
+  }
+}

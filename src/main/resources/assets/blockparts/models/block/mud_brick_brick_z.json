@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/brick_z",
+  "textures": {
+    "particle": "minecraft:block/mud_bricks",
+    "down": "minecraft:block/mud_bricks",
+    "up": "minecraft:block/mud_bricks",
+    "north": "minecraft:block/mud_bricks",
+    "south": "minecraft:block/mud_bricks",
+    "west": "minecraft:block/mud_bricks",
+    "east": "minecraft:block/mud_bricks"
+  }
+}

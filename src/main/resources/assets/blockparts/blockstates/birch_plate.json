@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/birch_plate_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/birch_plate_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/birch_plate_z"
+    }
+  }
+}

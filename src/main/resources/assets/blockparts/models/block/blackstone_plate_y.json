@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/plate_y",
+  "textures": {
+    "particle": "minecraft:block/blackstone",
+    "down": "minecraft:block/blackstone",
+    "up": "minecraft:block/blackstone",
+    "north": "minecraft:block/blackstone",
+    "south": "minecraft:block/blackstone",
+    "west": "minecraft:block/blackstone",
+    "east": "minecraft:block/blackstone"
+  }
+}

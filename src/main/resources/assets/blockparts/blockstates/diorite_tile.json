@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/diorite_tile_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/diorite_tile_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/diorite_tile_z"
+    }
+  }
+}

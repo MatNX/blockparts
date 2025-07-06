@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/small_cube_x",
+  "textures": {
+    "particle": "minecraft:block/oxidized_copper",
+    "down": "minecraft:block/oxidized_copper",
+    "up": "minecraft:block/oxidized_copper",
+    "north": "minecraft:block/oxidized_copper",
+    "south": "minecraft:block/oxidized_copper",
+    "west": "minecraft:block/oxidized_copper",
+    "east": "minecraft:block/oxidized_copper"
+  }
+}

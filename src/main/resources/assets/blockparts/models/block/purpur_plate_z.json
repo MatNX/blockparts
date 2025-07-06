@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/plate_z",
+  "textures": {
+    "particle": "minecraft:block/purpur_block",
+    "down": "minecraft:block/purpur_block",
+    "up": "minecraft:block/purpur_block",
+    "north": "minecraft:block/purpur_block",
+    "south": "minecraft:block/purpur_block",
+    "west": "minecraft:block/purpur_block",
+    "east": "minecraft:block/purpur_block"
+  }
+}

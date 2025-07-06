@@ -70,7 +70,7 @@ public class BlockParts
                 int[] s = entry.getValue();
                 String name = material + "_" + entry.getKey();
                 PART_BLOCKS.put(name, BLOCKS.registerBlock(name,
-                        () -> new PartBlock(s[0], s[1], s[2], BlockBehaviour.Properties.of()),
+                        (props) -> new PartBlock(s[0], s[1], s[2], props),
                         BlockBehaviour.Properties.of()));
             }
         }

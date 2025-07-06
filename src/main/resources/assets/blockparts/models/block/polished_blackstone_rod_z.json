@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/rod_z",
+  "textures": {
+    "particle": "minecraft:block/polished_blackstone_top",
+    "down": "minecraft:block/polished_blackstone_top",
+    "up": "minecraft:block/polished_blackstone_top",
+    "north": "minecraft:block/polished_blackstone_top",
+    "south": "minecraft:block/polished_blackstone_top",
+    "west": "minecraft:block/polished_blackstone_top",
+    "east": "minecraft:block/polished_blackstone_top"
+  }
+}

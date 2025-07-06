@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/cobbled_deepslate_rod_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/cobbled_deepslate_rod_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/cobbled_deepslate_rod_z"
+    }
+  }
+}

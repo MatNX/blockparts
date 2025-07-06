@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/plate_y",
+  "textures": {
+    "particle": "minecraft:block/andesite",
+    "down": "minecraft:block/andesite",
+    "up": "minecraft:block/andesite",
+    "north": "minecraft:block/andesite",
+    "south": "minecraft:block/andesite",
+    "west": "minecraft:block/andesite",
+    "east": "minecraft:block/andesite"
+  }
+}

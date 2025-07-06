@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/brick_y",
+  "textures": {
+    "particle": "minecraft:block/crimson_planks",
+    "down": "minecraft:block/crimson_planks",
+    "up": "minecraft:block/crimson_planks",
+    "north": "minecraft:block/crimson_planks",
+    "south": "minecraft:block/crimson_planks",
+    "west": "minecraft:block/crimson_planks",
+    "east": "minecraft:block/crimson_planks"
+  }
+}

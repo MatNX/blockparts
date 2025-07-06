@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_x",
+  "textures": {
+    "particle": "minecraft:block/red_sandstone_top",
+    "down": "minecraft:block/red_sandstone_top",
+    "up": "minecraft:block/red_sandstone_top",
+    "north": "minecraft:block/red_sandstone_top",
+    "south": "minecraft:block/red_sandstone_top",
+    "west": "minecraft:block/red_sandstone_top",
+    "east": "minecraft:block/red_sandstone_top"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/plate_y",
+  "textures": {
+    "particle": "minecraft:block/waxed_exposed_copper",
+    "down": "minecraft:block/waxed_exposed_copper",
+    "up": "minecraft:block/waxed_exposed_copper",
+    "north": "minecraft:block/waxed_exposed_copper",
+    "south": "minecraft:block/waxed_exposed_copper",
+    "west": "minecraft:block/waxed_exposed_copper",
+    "east": "minecraft:block/waxed_exposed_copper"
+  }
+}

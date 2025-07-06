@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/cube_z",
+  "textures": {
+    "particle": "minecraft:block/cherry_planks",
+    "down": "minecraft:block/cherry_planks",
+    "up": "minecraft:block/cherry_planks",
+    "north": "minecraft:block/cherry_planks",
+    "south": "minecraft:block/cherry_planks",
+    "west": "minecraft:block/cherry_planks",
+    "east": "minecraft:block/cherry_planks"
+  }
+}

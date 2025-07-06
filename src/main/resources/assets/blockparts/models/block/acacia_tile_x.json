@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_x",
+  "textures": {
+    "particle": "minecraft:block/acacia_planks",
+    "down": "minecraft:block/acacia_planks",
+    "up": "minecraft:block/acacia_planks",
+    "north": "minecraft:block/acacia_planks",
+    "south": "minecraft:block/acacia_planks",
+    "west": "minecraft:block/acacia_planks",
+    "east": "minecraft:block/acacia_planks"
+  }
+}

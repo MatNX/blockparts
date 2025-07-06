@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/stone_brick_rod_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/stone_brick_rod_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/stone_brick_rod_z"
+    }
+  }
+}

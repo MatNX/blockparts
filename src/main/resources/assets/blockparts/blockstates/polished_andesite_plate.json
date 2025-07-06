@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/polished_andesite_plate_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/polished_andesite_plate_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/polished_andesite_plate_z"
+    }
+  }
+}

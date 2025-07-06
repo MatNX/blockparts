@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/dark_oak_cube_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/dark_oak_cube_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/dark_oak_cube_z"
+    }
+  }
+}

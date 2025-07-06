@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/acacia_brick_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/acacia_brick_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/acacia_brick_z"
+    }
+  }
+}
