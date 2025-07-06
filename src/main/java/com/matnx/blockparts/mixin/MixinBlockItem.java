@@ -39,8 +39,8 @@ public abstract class MixinBlockItem {
     private void redirectSlab(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack stack = context.getItemInHand();
 
-        // Redirect placement for all slab items
-        if (block instanceof net.minecraft.world.level.block.SlabBlock) {
+        // Redirect placement for slabs and custom part blocks
+        if (block instanceof net.minecraft.world.level.block.SlabBlock || block instanceof com.matnx.blockparts.part.PartBlock) {
             // your replacement logic
             Level level = context.getLevel();
             BlockPos pos = context.getClickedPos();
