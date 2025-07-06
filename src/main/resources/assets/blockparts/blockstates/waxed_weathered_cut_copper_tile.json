@@ -1,10 +1,10 @@
 {
   "variants": {
-    "axis=x,axis_dir=positive": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_x"},
-    "axis=x,axis_dir=negative": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_x_neg"},
-    "axis=y,axis_dir=positive": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_y"},
-    "axis=y,axis_dir=negative": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_y_neg"},
-    "axis=z,axis_dir=positive": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_z"},
-    "axis=z,axis_dir=negative": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_z_neg"}
+    "facing=east": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_x"},
+    "facing=west": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_x_neg"},
+    "facing=up": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_y"},
+    "facing=down": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_y_neg"},
+    "facing=south": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_z"},
+    "facing=north": {"model": "blockparts:block/waxed_weathered_cut_copper_tile_z_neg"}
   }
 }
