@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_z_neg",
+  "textures": {
+    "particle": "minecraft:block/bamboo_planks",
+    "down": "minecraft:block/bamboo_planks",
+    "up": "minecraft:block/bamboo_planks",
+    "north": "minecraft:block/bamboo_planks",
+    "south": "minecraft:block/bamboo_planks",
+    "west": "minecraft:block/bamboo_planks",
+    "east": "minecraft:block/bamboo_planks"
+  }
+}

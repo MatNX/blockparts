@@ -43,7 +43,7 @@ public class PartBlock extends Block {
         return defaultBlockState().setValue(BlockStateProperties.AXIS, context.getClickedFace().getAxis());
     }
 
-    private VoxelShape shapeFor(BlockState state) {
+    protected VoxelShape shapeFor(BlockState state) {
         Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
         int x = sizeX;
         int y = sizeY;

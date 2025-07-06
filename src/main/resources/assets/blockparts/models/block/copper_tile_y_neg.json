@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_y_neg",
+  "textures": {
+    "particle": "minecraft:block/copper_block",
+    "down": "minecraft:block/copper_block",
+    "up": "minecraft:block/copper_block",
+    "north": "minecraft:block/copper_block",
+    "south": "minecraft:block/copper_block",
+    "west": "minecraft:block/copper_block",
+    "east": "minecraft:block/copper_block"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_x_neg",
+  "textures": {
+    "particle": "minecraft:block/bricks",
+    "down": "minecraft:block/bricks",
+    "up": "minecraft:block/bricks",
+    "north": "minecraft:block/bricks",
+    "south": "minecraft:block/bricks",
+    "west": "minecraft:block/bricks",
+    "east": "minecraft:block/bricks"
+  }
+}

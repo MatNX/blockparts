@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_x_neg",
+  "textures": {
+    "particle": "minecraft:block/bamboo_mosaic",
+    "down": "minecraft:block/bamboo_mosaic",
+    "up": "minecraft:block/bamboo_mosaic",
+    "north": "minecraft:block/bamboo_mosaic",
+    "south": "minecraft:block/bamboo_mosaic",
+    "west": "minecraft:block/bamboo_mosaic",
+    "east": "minecraft:block/bamboo_mosaic"
+  }
+}
