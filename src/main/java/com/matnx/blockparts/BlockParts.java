@@ -1,6 +1,7 @@
 package com.matnx.blockparts;
 
 import com.matnx.blockparts.part.PartBlock;
+import com.matnx.blockparts.part.TileBlock;
 import com.matnx.blockparts.statestore.StateStoreBlock;
 import com.matnx.blockparts.statestore.StateStoreBlockEntity;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -40,7 +41,7 @@ public class BlockParts
             "small_brick", new int[]{4, 8, 4},
             "small_cube", new int[]{4, 4, 4},
             "plate", new int[]{16, 4, 16},
-            "tile", new int[]{16, 4, 8},
+            "tile", new int[]{4, 16, 8},
             "rod", new int[]{4, 16, 4}
     );
 
@@ -75,7 +76,9 @@ public class BlockParts
                 int[] s = entry.getValue();
                 String name = material + "_" + entry.getKey();
                 DeferredBlock<Block> block = BLOCKS.registerBlock(name,
-                        (props) -> new PartBlock(s[0], s[1], s[2], props),
+                        (props) -> ("tile".equals(entry.getKey())
+                                ? new TileBlock(s[0], s[1], s[2], props)
+                                : new PartBlock(s[0], s[1], s[2], props)),
                         BlockBehaviour.Properties.of());
                 PART_BLOCKS.put(name, block);
                 ITEMS.registerSimpleBlockItem(name, block, new Item.Properties());

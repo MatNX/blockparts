@@ -1,13 +1,10 @@
 {
   "variants": {
-    "axis=x": {
-      "model": "blockparts:block/diorite_tile_x"
-    },
-    "axis=y": {
-      "model": "blockparts:block/diorite_tile_y"
-    },
-    "axis=z": {
-      "model": "blockparts:block/diorite_tile_z"
-    }
+    "axis=x,axis_dir=positive": {"model": "blockparts:block/diorite_tile_x"},
+    "axis=x,axis_dir=negative": {"model": "blockparts:block/diorite_tile_x_neg"},
+    "axis=y,axis_dir=positive": {"model": "blockparts:block/diorite_tile_y"},
+    "axis=y,axis_dir=negative": {"model": "blockparts:block/diorite_tile_y_neg"},
+    "axis=z,axis_dir=positive": {"model": "blockparts:block/diorite_tile_z"},
+    "axis=z,axis_dir=negative": {"model": "blockparts:block/diorite_tile_z_neg"}
   }
 }

@@ -1,0 +1,12 @@
+{
+  "parent": "blockparts:block/tile_y_neg",
+  "textures": {
+    "particle": "minecraft:block/waxed_weathered_copper",
+    "down": "minecraft:block/waxed_weathered_copper",
+    "up": "minecraft:block/waxed_weathered_copper",
+    "north": "minecraft:block/waxed_weathered_copper",
+    "south": "minecraft:block/waxed_weathered_copper",
+    "west": "minecraft:block/waxed_weathered_copper",
+    "east": "minecraft:block/waxed_weathered_copper"
+  }
+}
