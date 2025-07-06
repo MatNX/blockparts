@@ -6,7 +6,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,10 +36,11 @@ public abstract class MixinBlockItem {
     private Block block;
 
     @Inject(method = "place", at = @At("HEAD"), cancellable = true)
-    private void redirectAcaciaSlab(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
+    private void redirectSlab(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack stack = context.getItemInHand();
 
-        if (stack.getItem() == net.minecraft.world.item.Items.ACACIA_SLAB) {
+        // Redirect placement for all slab items
+        if (block instanceof net.minecraft.world.level.block.SlabBlock) {
             // your replacement logic
             Level level = context.getLevel();
             BlockPos pos = context.getClickedPos();

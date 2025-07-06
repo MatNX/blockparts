@@ -1,7 +1,13 @@
 {
   "variants": {
-    "axis=x": { "model": "blockparts:block/acacia_slab_x" },
-    "axis=y": { "model": "blockparts:block/acacia_slab_y" },
-    "axis=z": { "model": "blockparts:block/acacia_slab_z" }
+    "axis=x": {
+      "model": "blockparts:block/acacia_slab_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/acacia_slab_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/acacia_slab_z"
+    }
   }
 }

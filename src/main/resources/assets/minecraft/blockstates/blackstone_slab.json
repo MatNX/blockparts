@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "blockparts:block/blackstone_slab_x"
+    },
+    "axis=y": {
+      "model": "blockparts:block/blackstone_slab_y"
+    },
+    "axis=z": {
+      "model": "blockparts:block/blackstone_slab_z"
+    }
+  }
+}
