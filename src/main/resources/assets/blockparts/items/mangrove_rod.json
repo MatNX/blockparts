@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/mangrove_rod_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/mangrove_rod_y"
+  }
 }

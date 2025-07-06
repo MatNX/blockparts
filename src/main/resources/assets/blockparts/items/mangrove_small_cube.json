@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/mangrove_small_cube_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/mangrove_small_cube_y"
+  }
 }

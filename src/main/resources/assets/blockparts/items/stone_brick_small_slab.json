@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/stone_brick_small_slab_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/stone_brick_small_slab_y"
+  }
 }

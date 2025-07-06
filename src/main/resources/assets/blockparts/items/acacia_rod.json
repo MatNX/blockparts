@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/acacia_rod_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/acacia_rod_y"
+  }
 }

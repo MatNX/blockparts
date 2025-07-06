@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/cherry_plate_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/cherry_plate_y"
+  }
 }
