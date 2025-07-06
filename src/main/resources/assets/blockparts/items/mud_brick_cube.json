@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/mud_brick_cube_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/mud_brick_cube_y"
+  }
 }

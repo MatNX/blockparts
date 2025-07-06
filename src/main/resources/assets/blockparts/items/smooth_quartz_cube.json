@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/smooth_quartz_cube_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/smooth_quartz_cube_y"
+  }
 }

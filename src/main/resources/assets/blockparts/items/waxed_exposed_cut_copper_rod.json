@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/waxed_exposed_cut_copper_rod_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/waxed_exposed_cut_copper_rod_y"
+  }
 }

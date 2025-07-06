@@ -1,3 +1,6 @@
 {
-  "parent": "blockparts:block/waxed_weathered_copper_brick_y"
+  "model": {
+    "type": "minecraft:model",
+    "model": "blockparts:block/waxed_weathered_copper_brick_y"
+  }
 }
