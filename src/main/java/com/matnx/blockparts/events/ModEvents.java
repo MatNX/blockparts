@@ -8,7 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -18,17 +17,10 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.registries.NewRegistryEvent;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 import static com.matnx.blockparts.BlockParts.MODID;
-import static com.matnx.blockparts.BlockParts.STATE_STORE_BLOCK;
 
 @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.GAME)
 public class ModEvents {
@@ -37,28 +29,23 @@ public class ModEvents {
         Level level = event.getLevel();
 
         Direction face = event.getFace();
-        Vec3 hitVec = event.getHitVec().getLocation();
         BlockPos clickedPos = event.getPos();
 
-        // Check if the face was on a full block edge (0 or 1) or in between (e.g. slab top)
-        double axisValue = switch (face.getAxis()) {
-            case X -> hitVec.x - clickedPos.getX();
-            case Y -> hitVec.y - clickedPos.getY();
-            case Z -> hitVec.z - clickedPos.getZ();
-        };
-
-        boolean isFullFace = axisValue == 0.0 || axisValue == 1.0;
-
-        BlockPos targetPos = event.getPos();
-        // Example usage (you can remove or adapt this as needed)
-        if (isFullFace) targetPos = event.getPos().relative(event.getFace()); // Only proceed for full block face clicks
+        BlockPos targetPos = clickedPos;
+        BlockEntity targetEntity = level.getBlockEntity(targetPos);
+        if (!(targetEntity instanceof StateStoreBlockEntity)) {
+            BlockPos adjacentPos = clickedPos.relative(face);
+            BlockEntity adjacentEntity = level.getBlockEntity(adjacentPos);
+            if (adjacentEntity instanceof StateStoreBlockEntity) {
+                targetPos = adjacentPos;
+                targetEntity = adjacentEntity;
+            }
+        }
 
         BlockState state = level.getBlockState(targetPos);
 
         if (state.getBlock() != BlockParts.STATE_STORE_BLOCK.get()) return;
-
-        BlockEntity be = level.getBlockEntity(targetPos);
-        if (!(be instanceof StateStoreBlockEntity store)) return;
+        if (!(targetEntity instanceof StateStoreBlockEntity store)) return;
 
         ItemStack held = event.getItemStack();
         if (held.isEmpty() || !(held.getItem() instanceof BlockItem blockItem)) return;
@@ -88,4 +75,3 @@ public class ModEvents {
     }
 
 }
-
