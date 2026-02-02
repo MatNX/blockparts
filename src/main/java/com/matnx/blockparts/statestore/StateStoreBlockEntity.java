@@ -154,10 +154,16 @@ public class StateStoreBlockEntity extends BlockEntity {
         Vec3 clickPos = hit.getLocation().subtract(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ());
 
         Direction dir = hit.getDirection();
+        Direction inward = dir.getOpposite();
         clickPos = clickPos.add(
-                dir.getStepX() * 0.001,
-                dir.getStepY() * 0.001,
-                dir.getStepZ() * 0.001
+                inward.getStepX() * 0.001,
+                inward.getStepY() * 0.001,
+                inward.getStepZ() * 0.001
+        );
+        clickPos = new Vec3(
+                clampToBounds(clickPos.x),
+                clampToBounds(clickPos.y),
+                clampToBounds(clickPos.z)
         );
 
         int x = getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
@@ -317,6 +323,12 @@ public class StateStoreBlockEntity extends BlockEntity {
 
     private static boolean inBounds(int x, int y, int z) {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE && z >= 0 && z < SIZE;
+    }
+
+    private static double clampToBounds(double value) {
+        double min = 0.0001;
+        double max = 0.9999;
+        return Math.min(max, Math.max(min, value));
     }
 
     /* --------------------------------------------------------------------- */
