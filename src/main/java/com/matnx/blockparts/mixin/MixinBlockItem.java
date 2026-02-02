@@ -132,6 +132,16 @@ public abstract class MixinBlockItem {
                 finalizePlacement(level, adjacentPos, player, stack, originalState);
                 return InteractionResult.SUCCESS;
             }
+            InteractionResult surfaceResult = adjacentStore.tryAddBlockOnSurface(
+                    originalState,
+                    adjacentHit,
+                    context.getPlayer(),
+                    context.getHand()
+            );
+            if (surfaceResult == InteractionResult.SUCCESS) {
+                finalizePlacement(level, adjacentPos, player, stack, originalState);
+                return InteractionResult.SUCCESS;
+            }
             return InteractionResult.FAIL;
         }
 
