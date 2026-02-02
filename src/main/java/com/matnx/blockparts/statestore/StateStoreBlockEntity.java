@@ -168,6 +168,46 @@ public class StateStoreBlockEntity extends BlockEntity {
             placeAt(x, y, z, state);
             return InteractionResult.SUCCESS;
         }
+
+        double sizeX = voxelShape.max(Direction.Axis.X) - voxelShape.min(Direction.Axis.X);
+        double sizeY = voxelShape.max(Direction.Axis.Y) - voxelShape.min(Direction.Axis.Y);
+        double sizeZ = voxelShape.max(Direction.Axis.Z) - voxelShape.min(Direction.Axis.Z);
+        int[] xSlots = getAlignedSlots(sizeX);
+        int[] ySlots = getAlignedSlots(sizeY);
+        int[] zSlots = getAlignedSlots(sizeZ);
+        double slotSize = 1.0 / SIZE;
+        double bestDistance = Double.MAX_VALUE;
+        int bestX = -1;
+        int bestY = -1;
+        int bestZ = -1;
+
+        for (int candidateX : xSlots) {
+            for (int candidateY : ySlots) {
+                for (int candidateZ : zSlots) {
+                    if (!canPlaceAt(candidateX, candidateY, candidateZ, state)) {
+                        continue;
+                    }
+                    double centerX = candidateX * slotSize + sizeX / 2.0;
+                    double centerY = candidateY * slotSize + sizeY / 2.0;
+                    double centerZ = candidateZ * slotSize + sizeZ / 2.0;
+                    double dx = centerX - clickPos.x;
+                    double dy = centerY - clickPos.y;
+                    double dz = centerZ - clickPos.z;
+                    double distance = dx * dx + dy * dy + dz * dz;
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestX = candidateX;
+                        bestY = candidateY;
+                        bestZ = candidateZ;
+                    }
+                }
+            }
+        }
+
+        if (bestX != -1) {
+            placeAt(bestX, bestY, bestZ, state);
+            return InteractionResult.SUCCESS;
+        }
         return InteractionResult.FAIL;
     }
 
@@ -199,6 +239,32 @@ public class StateStoreBlockEntity extends BlockEntity {
         }
 
         return snappedSlot;
+    }
+
+    private static int[] getAlignedSlots(double size) {
+        int slots = SIZE;
+        double slotSize = 1.0 / slots;
+
+        if (size % slotSize != 0) {
+            throw new IllegalArgumentException("Block size must be a multiple of 0.25");
+        }
+
+        int step = (int) (size / slotSize);
+        int count = 0;
+        for (int i = 0; i <= slots - step; i++) {
+            if (i % step == 0) {
+                count++;
+            }
+        }
+
+        int[] results = new int[count];
+        int index = 0;
+        for (int i = 0; i <= slots - step; i++) {
+            if (i % step == 0) {
+                results[index++] = i;
+            }
+        }
+        return results;
     }
 
     /* --------------------------------------------------------------------- */
