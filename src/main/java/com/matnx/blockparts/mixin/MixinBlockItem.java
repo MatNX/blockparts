@@ -112,13 +112,35 @@ public abstract class MixinBlockItem {
     private InteractionResult tryPlaceInAdjacent(Level level, BlockPlaceContext context, BlockState originalState, ItemStack stack) {
         BlockPos adjacentPos = context.getClickedPos().relative(context.getClickedFace());
         Player player = context.getPlayer();
+        BlockState adjacentState = level.getBlockState(adjacentPos);
+        BlockEntity adjacentEntity = level.getBlockEntity(adjacentPos);
 
-        if (!level.getBlockState(adjacentPos).canBeReplaced()) {
+        if (adjacentEntity instanceof StateStoreBlockEntity adjacentStore) {
+            BlockHitResult adjacentHit = new BlockHitResult(
+                    context.getClickLocation(),
+                    context.getClickedFace().getOpposite(),
+                    adjacentPos,
+                    context.isInside()
+            );
+            InteractionResult addResult = adjacentStore.tryAddBlock(
+                    originalState,
+                    adjacentHit,
+                    context.getPlayer(),
+                    context.getHand()
+            );
+            if (addResult == InteractionResult.SUCCESS) {
+                finalizePlacement(level, adjacentPos, player, stack, originalState);
+                return InteractionResult.SUCCESS;
+            }
+            return InteractionResult.FAIL;
+        }
+
+        if (!adjacentState.canBeReplaced()) {
             return InteractionResult.FAIL;
         }
 
         BlockState customState = STATE_STORE_BLOCK.get().defaultBlockState();
-        BlockState replacedState = level.getBlockState(adjacentPos);
+        BlockState replacedState = adjacentState;
         if (!level.setBlock(adjacentPos, customState, 11)) {
             return InteractionResult.FAIL;
         }
