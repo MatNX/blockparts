@@ -154,16 +154,10 @@ public class StateStoreBlockEntity extends BlockEntity {
         Vec3 clickPos = hit.getLocation().subtract(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ());
 
         Direction dir = hit.getDirection();
-        Direction inward = dir.getOpposite();
         clickPos = clickPos.add(
-                inward.getStepX() * 0.001,
-                inward.getStepY() * 0.001,
-                inward.getStepZ() * 0.001
-        );
-        clickPos = new Vec3(
-                clampToBounds(clickPos.x),
-                clampToBounds(clickPos.y),
-                clampToBounds(clickPos.z)
+                dir.getStepX() * 0.001,
+                dir.getStepY() * 0.001,
+                dir.getStepZ() * 0.001
         );
 
         int x = getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
@@ -172,46 +166,6 @@ public class StateStoreBlockEntity extends BlockEntity {
 
         if (canPlaceAt(x, y, z, state)) {
             placeAt(x, y, z, state);
-            return InteractionResult.SUCCESS;
-        }
-
-        double sizeX = voxelShape.max(Direction.Axis.X) - voxelShape.min(Direction.Axis.X);
-        double sizeY = voxelShape.max(Direction.Axis.Y) - voxelShape.min(Direction.Axis.Y);
-        double sizeZ = voxelShape.max(Direction.Axis.Z) - voxelShape.min(Direction.Axis.Z);
-        int[] xSlots = getAlignedSlots(sizeX);
-        int[] ySlots = getAlignedSlots(sizeY);
-        int[] zSlots = getAlignedSlots(sizeZ);
-        double slotSize = 1.0 / SIZE;
-        double bestDistance = Double.MAX_VALUE;
-        int bestX = -1;
-        int bestY = -1;
-        int bestZ = -1;
-
-        for (int candidateX : xSlots) {
-            for (int candidateY : ySlots) {
-                for (int candidateZ : zSlots) {
-                    if (!canPlaceAt(candidateX, candidateY, candidateZ, state)) {
-                        continue;
-                    }
-                    double centerX = candidateX * slotSize + sizeX / 2.0;
-                    double centerY = candidateY * slotSize + sizeY / 2.0;
-                    double centerZ = candidateZ * slotSize + sizeZ / 2.0;
-                    double dx = centerX - clickPos.x;
-                    double dy = centerY - clickPos.y;
-                    double dz = centerZ - clickPos.z;
-                    double distance = dx * dx + dy * dy + dz * dz;
-                    if (distance < bestDistance) {
-                        bestDistance = distance;
-                        bestX = candidateX;
-                        bestY = candidateY;
-                        bestZ = candidateZ;
-                    }
-                }
-            }
-        }
-
-        if (bestX != -1) {
-            placeAt(bestX, bestY, bestZ, state);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.FAIL;
@@ -247,30 +201,17 @@ public class StateStoreBlockEntity extends BlockEntity {
         return snappedSlot;
     }
 
-    private static int[] getAlignedSlots(double size) {
-        int slots = SIZE;
+    public static int getSurfaceSlot(double min, double max, Direction face) {
+        double size = max - min;
+        int slots = 4;
         double slotSize = 1.0 / slots;
 
         if (size % slotSize != 0) {
             throw new IllegalArgumentException("Block size must be a multiple of 0.25");
         }
 
-        int step = (int) (size / slotSize);
-        int count = 0;
-        for (int i = 0; i <= slots - step; i++) {
-            if (i % step == 0) {
-                count++;
-            }
-        }
-
-        int[] results = new int[count];
-        int index = 0;
-        for (int i = 0; i <= slots - step; i++) {
-            if (i % step == 0) {
-                results[index++] = i;
-            }
-        }
-        return results;
+        int step = (int)(size / slotSize);
+        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 0 : slots - step;
     }
 
     /* --------------------------------------------------------------------- */
@@ -323,12 +264,6 @@ public class StateStoreBlockEntity extends BlockEntity {
 
     private static boolean inBounds(int x, int y, int z) {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE && z >= 0 && z < SIZE;
-    }
-
-    private static double clampToBounds(double value) {
-        double min = 0.0001;
-        double max = 0.9999;
-        return Math.min(max, Math.max(min, value));
     }
 
     /* --------------------------------------------------------------------- */
