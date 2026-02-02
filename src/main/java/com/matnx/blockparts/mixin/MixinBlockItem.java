@@ -13,12 +13,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.Direction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,12 +43,33 @@ public abstract class MixinBlockItem {
         if (block instanceof net.minecraft.world.level.block.SlabBlock || block instanceof com.matnx.blockparts.part.PartBlock) {
             // your replacement logic
             Level level = context.getLevel();
-            BlockPos pos = context.getClickedPos();
             Player player = context.getPlayer();
 
             // Your custom block to place
             BlockState originalState = block.getStateForPlacement(context);
+            if (originalState == null) {
+                cir.setReturnValue(InteractionResult.FAIL);
+                return;
+            }
             BlockState customState = STATE_STORE_BLOCK.get().defaultBlockState();
+            BlockPos pos = context.getClickedPos();
+            BlockPos storePos = findStorePos(level, pos, context.getClickedFace());
+            if (storePos != null) {
+                BlockEntity be = level.getBlockEntity(storePos);
+                if (be instanceof StateStoreBlockEntity stateStore) {
+                    InteractionResult result = stateStore.tryAddBlock(
+                            originalState,
+                            new BlockHitResult(context.getClickLocation(), context.getClickedFace(), storePos, context.isInside()),
+                            player,
+                            context.getHand()
+                    );
+                    if (result == InteractionResult.SUCCESS) {
+                        playPlacementEffects(level, storePos, player, originalState, stack);
+                    }
+                    cir.setReturnValue(result);
+                    return;
+                }
+            }
 
             if (!context.canPlace()) {
                 cir.setReturnValue(InteractionResult.FAIL);
@@ -56,26 +77,39 @@ public abstract class MixinBlockItem {
             }
 
             if (level.setBlock(pos, customState, 11)) { // 11 = flags: update neighbors + send to clients
-                SoundType soundtype = originalState.getSoundType(level, pos, player);
-                level.playSound(player, pos, soundtype.getPlaceSound(), SoundSource.BLOCKS,
-                        (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-
-                if (player instanceof ServerPlayer serverPlayer) {
-                    CriteriaTriggers.PLACED_BLOCK.trigger(serverPlayer, pos, stack);
-                }
-
-                level.gameEvent(GameEvent.BLOCK_PLACE, pos, Context.of(player, originalState));
-
-                stack.consume(1, player);
+                playPlacementEffects(level, pos, player, originalState, stack);
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof StateStoreBlockEntity stateStore) {
-                    BlockState state = block.getStateForPlacement(context);
-                    stateStore.tryAddBlock(state, new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside()), context.getPlayer(), context.getHand());
+                    stateStore.tryAddBlock(originalState, new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside()), context.getPlayer(), context.getHand());
                 }
                 cir.setReturnValue(InteractionResult.SUCCESS);
             } else {
                 cir.setReturnValue(InteractionResult.FAIL);
             }
         }
+    }
+
+    private static BlockPos findStorePos(Level level, BlockPos clickedPos, Direction face) {
+        BlockEntity direct = level.getBlockEntity(clickedPos);
+        if (direct instanceof StateStoreBlockEntity) {
+            return clickedPos;
+        }
+        BlockPos adjacent = clickedPos.relative(face.getOpposite());
+        BlockEntity adjacentEntity = level.getBlockEntity(adjacent);
+        return adjacentEntity instanceof StateStoreBlockEntity ? adjacent : null;
+    }
+
+    private void playPlacementEffects(Level level, BlockPos pos, Player player, BlockState originalState, ItemStack stack) {
+        SoundType soundtype = originalState.getSoundType(level, pos, player);
+        level.playSound(player, pos, soundtype.getPlaceSound(), SoundSource.BLOCKS,
+                (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            CriteriaTriggers.PLACED_BLOCK.trigger(serverPlayer, pos, stack);
+        }
+
+        level.gameEvent(GameEvent.BLOCK_PLACE, pos, Context.of(player, originalState));
+
+        stack.consume(1, player);
     }
 }
