@@ -160,9 +160,19 @@ public class StateStoreBlockEntity extends BlockEntity {
                 dir.getStepZ() * 0.001
         );
 
-        int x = getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
-        int y = getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
-        int z = getSnappedSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), clickPos.z);
+        int x = dir.getAxis() == Direction.Axis.X
+                ? getSurfaceSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), dir)
+                : getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
+        int y = dir.getAxis() == Direction.Axis.Y
+                ? getSurfaceSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), dir)
+                : getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
+        int z = dir.getAxis() == Direction.Axis.Z
+                ? getSurfaceSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), dir)
+                : getSnappedSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), clickPos.z);
+
+        if (x < 0 || y < 0 || z < 0) {
+            return InteractionResult.FAIL;
+        }
 
         if (canPlaceAt(x, y, z, state)) {
             placeAt(x, y, z, state);
@@ -199,6 +209,19 @@ public class StateStoreBlockEntity extends BlockEntity {
         }
 
         return snappedSlot;
+    }
+
+    public static int getSurfaceSlot(double min, double max, Direction face) {
+        double size = max - min;
+        int slots = 4;
+        double slotSize = 1.0 / slots;
+
+        if (size % slotSize != 0) {
+            throw new IllegalArgumentException("Block size must be a multiple of 0.25");
+        }
+
+        int step = (int)(size / slotSize);
+        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 0 : slots - step;
     }
 
     /* --------------------------------------------------------------------- */
