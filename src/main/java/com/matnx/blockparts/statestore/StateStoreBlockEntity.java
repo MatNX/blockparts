@@ -217,6 +217,36 @@ public class StateStoreBlockEntity extends BlockEntity {
         return InteractionResult.FAIL;
     }
 
+    public InteractionResult tryAddBlockOnSurface(BlockState state, BlockHitResult hit, Player player, InteractionHand hand) {
+        VoxelShape voxelShape = state.getShape(this.getLevel(), this.getBlockPos());
+        Vec3 clickPos = hit.getLocation().subtract(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ());
+
+        Direction dir = hit.getDirection();
+        clickPos = clickPos.add(
+                dir.getStepX() * 0.001,
+                dir.getStepY() * 0.001,
+                dir.getStepZ() * 0.001
+        );
+
+        int x = getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
+        int y = getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
+        int z = getSnappedSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), clickPos.z);
+
+        if (dir.getAxis() == Direction.Axis.X) {
+            x = getSurfaceSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), dir);
+        } else if (dir.getAxis() == Direction.Axis.Y) {
+            y = getSurfaceSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), dir);
+        } else if (dir.getAxis() == Direction.Axis.Z) {
+            z = getSurfaceSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), dir);
+        }
+
+        if (canPlaceAt(x, y, z, state)) {
+            placeAt(x, y, z, state);
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.FAIL;
+    }
+
     public static int getSnappedSlot(double min, double max, double click) {
         double size = max - min;
         int slots = 4;
