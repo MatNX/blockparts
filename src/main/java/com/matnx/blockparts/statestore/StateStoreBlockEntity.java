@@ -33,6 +33,7 @@ public class StateStoreBlockEntity extends BlockEntity {
     private static final int SIZE = 4; // 4 × 4 × 4 grid → 64 micro‐blocks
 
     private final BlockState[][][] storedStates = new BlockState[SIZE][SIZE][SIZE];
+    private final boolean[][][] occupiedSlots = new boolean[SIZE][SIZE][SIZE];
 
     /**
      * Cumulative shape of everything currently stored, kept up‑to‑date via
@@ -59,9 +60,21 @@ public class StateStoreBlockEntity extends BlockEntity {
         }
     }
 
+    private void initializeOccupiedSlots() {
+        for (int x = 0; x < SIZE; x++) {
+            for (int y = 0; y < SIZE; y++) {
+                for (int z = 0; z < SIZE; z++) {
+                    occupiedSlots[x][y][z] = false;
+                }
+            }
+        }
+    }
+
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        initializeStates();
+        initializeOccupiedSlots();
         ListTag statesList = tag.getList("StoredStates", Tag.TAG_COMPOUND);
         for (int i = 0; i < statesList.size(); i++) {
             CompoundTag stateTag = statesList.getCompound(i);
@@ -71,6 +84,16 @@ public class StateStoreBlockEntity extends BlockEntity {
             BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, stateTag.get("State")).getOrThrow();
             if (inBounds(x, y, z)) {
                 storedStates[x][y][z] = blockState;
+            }
+        }
+        ListTag occupiedList = tag.getList("OccupiedSlots", Tag.TAG_COMPOUND);
+        for (int i = 0; i < occupiedList.size(); i++) {
+            CompoundTag occupiedTag = occupiedList.getCompound(i);
+            int x = occupiedTag.getInt("X");
+            int y = occupiedTag.getInt("Y");
+            int z = occupiedTag.getInt("Z");
+            if (inBounds(x, y, z)) {
+                occupiedSlots[x][y][z] = true;
             }
         }
         recalculateShape();
@@ -98,6 +121,22 @@ public class StateStoreBlockEntity extends BlockEntity {
             }
         }
         tag.put("StoredStates", statesList);
+        ListTag occupiedList = new ListTag();
+        for (int x = 0; x < SIZE; x++) {
+            for (int y = 0; y < SIZE; y++) {
+                for (int z = 0; z < SIZE; z++) {
+                    if (!occupiedSlots[x][y][z]) {
+                        continue;
+                    }
+                    CompoundTag occupiedTag = new CompoundTag();
+                    occupiedTag.putInt("X", x);
+                    occupiedTag.putInt("Y", y);
+                    occupiedTag.putInt("Z", z);
+                    occupiedList.add(occupiedTag);
+                }
+            }
+        }
+        tag.put("OccupiedSlots", occupiedList);
     }
 
     /* --------------------------------------------------------------------- */
@@ -111,7 +150,7 @@ public class StateStoreBlockEntity extends BlockEntity {
      */
     public boolean canPlaceAt(int x, int y, int z, BlockState state) {
         if (!inBounds(x, y, z)) return false;
-        if (!isAir(storedStates[x][y][z])) return false;
+        if (!isAir(storedStates[x][y][z]) || occupiedSlots[x][y][z]) return false;
 
         VoxelShape candidate = translatedShape(x, y, z, state);
         // Intersection test: if AND is not empty, they overlap → placement denied
@@ -164,11 +203,7 @@ public class StateStoreBlockEntity extends BlockEntity {
         int y = getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
         int z = getSnappedSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), clickPos.z);
 
-        if (canPlaceAt(x, y, z, state)) {
-            placeAt(x, y, z, state);
-            return InteractionResult.SUCCESS;
-        }
-        return InteractionResult.FAIL;
+        return placeWithOverflow(state, voxelShape, x, y, z);
     }
 
     public InteractionResult tryAddBlockOnSurface(BlockState state, BlockHitResult hit, Player player, InteractionHand hand) {
@@ -194,11 +229,7 @@ public class StateStoreBlockEntity extends BlockEntity {
             z = getSurfaceSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), dir);
         }
 
-        if (canPlaceAt(x, y, z, state)) {
-            placeAt(x, y, z, state);
-            return InteractionResult.SUCCESS;
-        }
-        return InteractionResult.FAIL;
+        return placeWithOverflow(state, voxelShape, x, y, z);
     }
 
     public static int getSnappedSlot(double min, double max, double click) {
@@ -211,12 +242,13 @@ public class StateStoreBlockEntity extends BlockEntity {
         }
 
         int step = (int)(size / slotSize); // how many slots the block spans
+        int snapStep = getSnapStep(step);
         int snappedSlot = -1;
         double minDistance = Double.MAX_VALUE;
 
         // Only consider starting indices that are multiples of `step`
-        for (int i = 0; i <= slots - step; i++) {
-            if (i % step != 0) continue; // ensure tiling compatibility
+        for (int i = 0; i <= slots - snapStep; i++) {
+            if (i % snapStep != 0) continue; // ensure tiling compatibility
 
             double slotStart = i * slotSize;
             double slotEnd = slotStart + size;
@@ -241,7 +273,12 @@ public class StateStoreBlockEntity extends BlockEntity {
         }
 
         int step = (int)(size / slotSize);
-        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 0 : slots - step;
+        int snapStep = getSnapStep(step);
+        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 0 : slots - snapStep;
+    }
+
+    private static int getSnapStep(int step) {
+        return Math.max(1, step / 2);
     }
 
     /* --------------------------------------------------------------------- */
@@ -294,6 +331,148 @@ public class StateStoreBlockEntity extends BlockEntity {
 
     private static boolean inBounds(int x, int y, int z) {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE && z >= 0 && z < SIZE;
+    }
+
+    private boolean isSlotFree(int x, int y, int z) {
+        return inBounds(x, y, z) && isAir(storedStates[x][y][z]) && !occupiedSlots[x][y][z];
+    }
+
+    private void markSlotOccupied(int x, int y, int z) {
+        if (!inBounds(x, y, z)) return;
+        occupiedSlots[x][y][z] = true;
+    }
+
+    private InteractionResult placeWithOverflow(BlockState state, VoxelShape voxelShape, int x, int y, int z) {
+        if (this.level == null) {
+            return InteractionResult.FAIL;
+        }
+
+        int stepX = getStepForSize(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X));
+        int stepY = getStepForSize(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y));
+        int stepZ = getStepForSize(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z));
+
+        AxisSegment[] xSegments = getAxisSegments(x, stepX);
+        AxisSegment[] ySegments = getAxisSegments(y, stepY);
+        AxisSegment[] zSegments = getAxisSegments(z, stepZ);
+
+        if (!canPlaceAt(x, y, z, state)) {
+            return InteractionResult.FAIL;
+        }
+
+        for (AxisSegment xSegment : xSegments) {
+            for (AxisSegment ySegment : ySegments) {
+                for (AxisSegment zSegment : zSegments) {
+                    if (xSegment.offset == 0 && ySegment.offset == 0 && zSegment.offset == 0) {
+                        continue;
+                    }
+                    BlockPos targetPos = worldPosition.offset(xSegment.offset, ySegment.offset, zSegment.offset);
+                    StateStoreBlockEntity targetStore = getOrCreateStore(targetPos);
+                    if (targetStore == null) {
+                        return InteractionResult.FAIL;
+                    }
+                    if (!areSlotsFree(targetStore, xSegment, ySegment, zSegment)) {
+                        return InteractionResult.FAIL;
+                    }
+                }
+            }
+        }
+
+        placeAt(x, y, z, state);
+
+        for (AxisSegment xSegment : xSegments) {
+            for (AxisSegment ySegment : ySegments) {
+                for (AxisSegment zSegment : zSegments) {
+                    if (xSegment.offset == 0 && ySegment.offset == 0 && zSegment.offset == 0) {
+                        continue;
+                    }
+                    BlockPos targetPos = worldPosition.offset(xSegment.offset, ySegment.offset, zSegment.offset);
+                    StateStoreBlockEntity targetStore = getOrCreateStore(targetPos);
+                    if (targetStore != null) {
+                        targetStore.markSlotsOccupied(xSegment, ySegment, zSegment);
+                    }
+                }
+            }
+        }
+
+        return InteractionResult.SUCCESS;
+    }
+
+    private int getStepForSize(double min, double max) {
+        double size = max - min;
+        double slotSize = 1.0 / SIZE;
+        if (size % slotSize != 0) {
+            throw new IllegalArgumentException("Block size must be a multiple of 0.25");
+        }
+        return (int) (size / slotSize);
+    }
+
+    private AxisSegment[] getAxisSegments(int start, int step) {
+        int overflow = start + step - SIZE;
+        if (overflow <= 0) {
+            return new AxisSegment[] { new AxisSegment(0, start, step) };
+        }
+        return new AxisSegment[] {
+                new AxisSegment(0, start, step - overflow),
+                new AxisSegment(1, 0, overflow)
+        };
+    }
+
+    private boolean areSlotsFree(StateStoreBlockEntity targetStore, AxisSegment xSegment, AxisSegment ySegment, AxisSegment zSegment) {
+        for (int xi = xSegment.start; xi < xSegment.start + xSegment.length; xi++) {
+            for (int yi = ySegment.start; yi < ySegment.start + ySegment.length; yi++) {
+                for (int zi = zSegment.start; zi < zSegment.start + zSegment.length; zi++) {
+                    if (!targetStore.isSlotFree(xi, yi, zi)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void markSlotsOccupied(AxisSegment xSegment, AxisSegment ySegment, AxisSegment zSegment) {
+        for (int xi = xSegment.start; xi < xSegment.start + xSegment.length; xi++) {
+            for (int yi = ySegment.start; yi < ySegment.start + ySegment.length; yi++) {
+                for (int zi = zSegment.start; zi < zSegment.start + zSegment.length; zi++) {
+                    markSlotOccupied(xi, yi, zi);
+                }
+            }
+        }
+        setChanged();
+        if (this.level != null) {
+            this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    private StateStoreBlockEntity getOrCreateStore(BlockPos pos) {
+        if (this.level == null) {
+            return null;
+        }
+        BlockEntity entity = this.level.getBlockEntity(pos);
+        if (entity instanceof StateStoreBlockEntity store) {
+            return store;
+        }
+        BlockState state = this.level.getBlockState(pos);
+        if (!state.canBeReplaced()) {
+            return null;
+        }
+        if (!this.level.setBlock(pos, BlockParts.STATE_STORE_BLOCK.get().defaultBlockState(), 11)) {
+            return null;
+        }
+        BlockEntity newEntity = this.level.getBlockEntity(pos);
+        return newEntity instanceof StateStoreBlockEntity store ? store : null;
+    }
+
+    private static class AxisSegment {
+        private final int offset;
+        private final int start;
+        private final int length;
+
+        private AxisSegment(int offset, int start, int length) {
+            this.offset = offset;
+            this.start = start;
+            this.length = length;
+        }
     }
 
     /* --------------------------------------------------------------------- */
