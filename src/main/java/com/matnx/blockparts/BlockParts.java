@@ -63,7 +63,7 @@ public class BlockParts
             "oxidized_cut_copper_slab", "waxed_cut_copper_slab", "waxed_exposed_cut_copper_slab",
             "waxed_weathered_cut_copper_slab", "waxed_oxidized_cut_copper_slab",
             "blackstone_slab", "polished_blackstone_slab", "polished_blackstone_brick_slab",
-            "petrified_oak_slab", "mud_brick_slab", "deepslate_brick_slab",
+            "petrified_oak_slab", "mud_brick_slab", "deepslate_brick_slab", "end_stone_brick_slab",
             "deepslate_tile_slab", "cobbled_deepslate_slab", "polished_deepslate_slab"
     };
 
