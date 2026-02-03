@@ -150,25 +150,51 @@ public class StateStoreBlockEntity extends BlockEntity {
     }
 
     public InteractionResult tryAddBlock(BlockState state, BlockHitResult hit, Player player, InteractionHand hand) {
-        VoxelShape voxelShape = state.getShape(this.getLevel(), this.getBlockPos());
-        Vec3 clickPos = hit.getLocation().subtract(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ());
-
+        Vec3 clickPos = hit.getLocation().subtract(Vec3.atLowerCornerOf(worldPosition));
         Direction dir = hit.getDirection();
-        clickPos = clickPos.add(
-                dir.getStepX() * 0.001,
-                dir.getStepY() * 0.001,
-                dir.getStepZ() * 0.001
-        );
 
-        int x = getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
-        int y = getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
-        int z = getSnappedSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), clickPos.z);
+        // 1. Determine size of the block being placed (in 1/4th units)
+        // Assuming your shapes are box-like and align to the 4x4x4 grid
+        VoxelShape shape = state.getShape(this.getLevel(), this.getBlockPos());
+        int sizeX = (int) Math.round((shape.max(Direction.Axis.X) - shape.min(Direction.Axis.X)) * 4);
+        int sizeY = (int) Math.round((shape.max(Direction.Axis.Y) - shape.min(Direction.Axis.Y)) * 4);
+        int sizeZ = (int) Math.round((shape.max(Direction.Axis.Z) - shape.min(Direction.Axis.Z)) * 4);
 
-        if (canPlaceAt(x, y, z, state)) {
-            placeAt(x, y, z, state);
-            return InteractionResult.SUCCESS;
+        // 2. Initial snapped position
+        int startX = getSnappedSlot(shape.min(Direction.Axis.X), shape.max(Direction.Axis.X), clickPos.x);
+        int startY = getSnappedSlot(shape.min(Direction.Axis.Y), shape.max(Direction.Axis.Y), clickPos.y);
+        int startZ = getSnappedSlot(shape.min(Direction.Axis.Z), shape.max(Direction.Axis.Z), clickPos.z);
+
+        // 3. Determine the step size based on the click direction
+        // We step by the size of the object we are placing
+        int stepSize = switch (dir.getAxis()) {
+            case X -> sizeX;
+            case Y -> sizeY;
+            case Z -> sizeZ;
+        };
+
+        // 4. Iterate into the block
+        for (int i = 0; i < 4; i += stepSize) {
+            int targetX = startX + (dir.getStepX() * i);
+            int targetY = startY + (dir.getStepY() * i);
+            int targetZ = startZ + (dir.getStepZ() * i);
+
+            // Check bounds (accounting for the full size of the object)
+            if (isOutOfBounds(targetX, targetY, targetZ, sizeX, sizeY, sizeZ)) break;
+
+            if (canPlaceAt(targetX, targetY, targetZ, state)) {
+                placeAt(targetX, targetY, targetZ, state);
+                return InteractionResult.SUCCESS;
+            }
         }
+
         return InteractionResult.FAIL;
+    }
+
+    private boolean isOutOfBounds(int x, int y, int z, int sx, int sy, int sz) {
+        return x < 0 || (x + sx) > 4 ||
+                y < 0 || (y + sy) > 4 ||
+                z < 0 || (z + sz) > 4;
     }
 
     public InteractionResult tryAddBlockOnSurface(BlockState state, BlockHitResult hit, Player player, InteractionHand hand) {
