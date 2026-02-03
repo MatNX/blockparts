@@ -203,7 +203,11 @@ public class StateStoreBlockEntity extends BlockEntity {
         int y = getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
         int z = getSnappedSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), clickPos.z);
 
-        return placeWithOverflow(state, voxelShape, x, y, z);
+        PlacementTarget target = resolvePlacementTarget(x, y, z);
+        if (target == null) {
+            return InteractionResult.FAIL;
+        }
+        return target.store.placeWithOverflow(state, voxelShape, target.x, target.y, target.z);
     }
 
     public InteractionResult tryAddBlockOnSurface(BlockState state, BlockHitResult hit, Player player, InteractionHand hand) {
@@ -229,7 +233,11 @@ public class StateStoreBlockEntity extends BlockEntity {
             z = getSurfaceSlot(voxelShape.min(Direction.Axis.Z), voxelShape.max(Direction.Axis.Z), dir);
         }
 
-        return placeWithOverflow(state, voxelShape, x, y, z);
+        PlacementTarget target = resolvePlacementTarget(x, y, z);
+        if (target == null) {
+            return InteractionResult.FAIL;
+        }
+        return target.store.placeWithOverflow(state, voxelShape, target.x, target.y, target.z);
     }
 
     public static int getSnappedSlot(double min, double max, double click) {
@@ -243,12 +251,14 @@ public class StateStoreBlockEntity extends BlockEntity {
 
         int step = (int)(size / slotSize); // how many slots the block spans
         int snapStep = getSnapStep(step);
-        int snappedSlot = -1;
+        int snappedSlot = 0;
         double minDistance = Double.MAX_VALUE;
+        int startMin = -(step - 1);
+        int startMax = slots - 1;
 
         // Only consider starting indices that are multiples of `step`
-        for (int i = 0; i <= slots - snapStep; i++) {
-            if (i % snapStep != 0) continue; // ensure tiling compatibility
+        for (int i = startMin; i <= startMax; i++) {
+            if (Math.floorMod(i, snapStep) != 0) continue; // ensure tiling compatibility
 
             double slotStart = i * slotSize;
             double slotEnd = slotStart + size;
@@ -273,8 +283,7 @@ public class StateStoreBlockEntity extends BlockEntity {
         }
 
         int step = (int)(size / slotSize);
-        int snapStep = getSnapStep(step);
-        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 0 : slots - snapStep;
+        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? -step : slots - step;
     }
 
     private static int getSnapStep(int step) {
@@ -297,6 +306,8 @@ public class StateStoreBlockEntity extends BlockEntity {
                     BlockState state = storedStates[x][y][z];
                     if (!isAir(state)) {
                         combined = Shapes.join(combined, translatedShape(x, y, z, state), BooleanOp.OR);
+                    } else if (occupiedSlots[x][y][z]) {
+                        combined = Shapes.join(combined, slotShape(x, y, z), BooleanOp.OR);
                     }
                 }
             }
@@ -315,6 +326,11 @@ public class StateStoreBlockEntity extends BlockEntity {
     private VoxelShape translatedShape(int x, int y, int z, BlockState state) {
         double cell = 1.0D / SIZE; // 0.25 for SIZE = 4
         return state.getShape(this.getLevel(), this.getBlockPos()).move(x * cell, y * cell, z * cell);
+    }
+
+    private static VoxelShape slotShape(int x, int y, int z) {
+        double cell = 1.0D / SIZE;
+        return Shapes.box(x * cell, y * cell, z * cell, (x + 1) * cell, (y + 1) * cell, (z + 1) * cell);
     }
 
     /* --------------------------------------------------------------------- */
@@ -355,20 +371,21 @@ public class StateStoreBlockEntity extends BlockEntity {
         AxisSegment[] ySegments = getAxisSegments(y, stepY);
         AxisSegment[] zSegments = getAxisSegments(z, stepZ);
 
-        if (!canPlaceAt(x, y, z, state)) {
+        VoxelShape candidate = translatedShape(x, y, z, state);
+        if (Shapes.joinIsNotEmpty(this.shape, candidate, BooleanOp.AND)) {
             return InteractionResult.FAIL;
         }
 
         for (AxisSegment xSegment : xSegments) {
             for (AxisSegment ySegment : ySegments) {
                 for (AxisSegment zSegment : zSegments) {
-                    if (xSegment.offset == 0 && ySegment.offset == 0 && zSegment.offset == 0) {
-                        continue;
-                    }
-                    BlockPos targetPos = worldPosition.offset(xSegment.offset, ySegment.offset, zSegment.offset);
-                    StateStoreBlockEntity targetStore = getOrCreateStore(targetPos);
-                    if (targetStore == null) {
-                        return InteractionResult.FAIL;
+                    StateStoreBlockEntity targetStore = this;
+                    if (!(xSegment.offset == 0 && ySegment.offset == 0 && zSegment.offset == 0)) {
+                        BlockPos targetPos = worldPosition.offset(xSegment.offset, ySegment.offset, zSegment.offset);
+                        targetStore = getOrCreateStore(targetPos);
+                        if (targetStore == null) {
+                            return InteractionResult.FAIL;
+                        }
                     }
                     if (!areSlotsFree(targetStore, xSegment, ySegment, zSegment)) {
                         return InteractionResult.FAIL;
@@ -408,13 +425,56 @@ public class StateStoreBlockEntity extends BlockEntity {
 
     private AxisSegment[] getAxisSegments(int start, int step) {
         int overflow = start + step - SIZE;
-        if (overflow <= 0) {
+        int underflow = -start;
+        if (overflow <= 0 && underflow <= 0) {
             return new AxisSegment[] { new AxisSegment(0, start, step) };
         }
+        if (overflow > 0) {
+            return new AxisSegment[] {
+                    new AxisSegment(0, start, step - overflow),
+                    new AxisSegment(1, 0, overflow)
+            };
+        }
         return new AxisSegment[] {
-                new AxisSegment(0, start, step - overflow),
-                new AxisSegment(1, 0, overflow)
+                new AxisSegment(0, 0, step - underflow),
+                new AxisSegment(-1, SIZE - underflow, underflow)
         };
+    }
+
+    private PlacementTarget resolvePlacementTarget(int x, int y, int z) {
+        int offsetX = 0;
+        int offsetY = 0;
+        int offsetZ = 0;
+        if (x < 0) {
+            offsetX = -1;
+            x += SIZE;
+        } else if (x >= SIZE) {
+            offsetX = 1;
+            x -= SIZE;
+        }
+        if (y < 0) {
+            offsetY = -1;
+            y += SIZE;
+        } else if (y >= SIZE) {
+            offsetY = 1;
+            y -= SIZE;
+        }
+        if (z < 0) {
+            offsetZ = -1;
+            z += SIZE;
+        } else if (z >= SIZE) {
+            offsetZ = 1;
+            z -= SIZE;
+        }
+        if (offsetX == 0 && offsetY == 0 && offsetZ == 0) {
+            return new PlacementTarget(this, x, y, z);
+        }
+        BlockPos targetPos = worldPosition.offset(offsetX, offsetY, offsetZ);
+        StateStoreBlockEntity targetStore = getOrCreateStore(targetPos);
+        if (targetStore == null) {
+            return null;
+        }
+        return new PlacementTarget(targetStore, x, y, z);
     }
 
     private boolean areSlotsFree(StateStoreBlockEntity targetStore, AxisSegment xSegment, AxisSegment ySegment, AxisSegment zSegment) {
@@ -472,6 +532,20 @@ public class StateStoreBlockEntity extends BlockEntity {
             this.offset = offset;
             this.start = start;
             this.length = length;
+        }
+    }
+
+    private static class PlacementTarget {
+        private final StateStoreBlockEntity store;
+        private final int x;
+        private final int y;
+        private final int z;
+
+        private PlacementTarget(StateStoreBlockEntity store, int x, int y, int z) {
+            this.store = store;
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
     }
 
