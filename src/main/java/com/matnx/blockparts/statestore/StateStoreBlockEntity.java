@@ -31,6 +31,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class StateStoreBlockEntity extends BlockEntity {
     private static final int SIZE = 4; // 4 × 4 × 4 grid → 64 micro‐blocks
+    private static final double SLOT_SIZE = 1.0D / SIZE;
+    private static final double EPSILON = 1.0E-6D;
 
     private final BlockState[][][] storedStates = new BlockState[SIZE][SIZE][SIZE];
     private final boolean[][][] occupiedSlots = new boolean[SIZE][SIZE][SIZE];
@@ -198,6 +200,7 @@ public class StateStoreBlockEntity extends BlockEntity {
                 dir.getStepY() * 0.001,
                 dir.getStepZ() * 0.001
         );
+        clickPos = clampClickPos(clickPos);
 
         int x = getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
         int y = getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
@@ -207,7 +210,7 @@ public class StateStoreBlockEntity extends BlockEntity {
         if (target == null) {
             return InteractionResult.FAIL;
         }
-        return target.store.placeWithOverflow(state, voxelShape, target.x, target.y, target.z);
+        return placeWithTarget(target, state, voxelShape);
     }
 
     public InteractionResult tryAddBlockOnSurface(BlockState state, BlockHitResult hit, Player player, InteractionHand hand) {
@@ -220,6 +223,7 @@ public class StateStoreBlockEntity extends BlockEntity {
                 dir.getStepY() * 0.001,
                 dir.getStepZ() * 0.001
         );
+        clickPos = clampClickPos(clickPos);
 
         int x = getSnappedSlot(voxelShape.min(Direction.Axis.X), voxelShape.max(Direction.Axis.X), clickPos.x);
         int y = getSnappedSlot(voxelShape.min(Direction.Axis.Y), voxelShape.max(Direction.Axis.Y), clickPos.y);
@@ -237,19 +241,13 @@ public class StateStoreBlockEntity extends BlockEntity {
         if (target == null) {
             return InteractionResult.FAIL;
         }
-        return target.store.placeWithOverflow(state, voxelShape, target.x, target.y, target.z);
+        return placeWithTarget(target, state, voxelShape);
     }
 
     public static int getSnappedSlot(double min, double max, double click) {
         double size = max - min;
-        int slots = 4;
-        double slotSize = 1.0 / slots;
-
-        if (size % slotSize != 0) {
-            throw new IllegalArgumentException("Block size must be a multiple of 0.25");
-        }
-
-        int step = (int)(size / slotSize); // how many slots the block spans
+        int slots = SIZE;
+        int step = sizeToSlots(size); // how many slots the block spans
         int snapStep = getSnapStep(step);
         int snappedSlot = 0;
         double minDistance = Double.MAX_VALUE;
@@ -260,7 +258,7 @@ public class StateStoreBlockEntity extends BlockEntity {
         for (int i = startMin; i <= startMax; i++) {
             if (Math.floorMod(i, snapStep) != 0) continue; // ensure tiling compatibility
 
-            double slotStart = i * slotSize;
+            double slotStart = i * SLOT_SIZE;
             double slotEnd = slotStart + size;
             double center = (slotStart + slotEnd) / 2.0;
             double distance = Math.abs(center - click);
@@ -275,15 +273,8 @@ public class StateStoreBlockEntity extends BlockEntity {
 
     public static int getSurfaceSlot(double min, double max, Direction face) {
         double size = max - min;
-        int slots = 4;
-        double slotSize = 1.0 / slots;
-
-        if (size % slotSize != 0) {
-            throw new IllegalArgumentException("Block size must be a multiple of 0.25");
-        }
-
-        int step = (int)(size / slotSize);
-        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? -step : slots - step;
+        int step = sizeToSlots(size);
+        return face.getAxisDirection() == Direction.AxisDirection.NEGATIVE ? -step : SIZE - step;
     }
 
     private static int getSnapStep(int step) {
@@ -324,13 +315,11 @@ public class StateStoreBlockEntity extends BlockEntity {
      * at (x, y, z).
      */
     private VoxelShape translatedShape(int x, int y, int z, BlockState state) {
-        double cell = 1.0D / SIZE; // 0.25 for SIZE = 4
-        return state.getShape(this.getLevel(), this.getBlockPos()).move(x * cell, y * cell, z * cell);
+        return state.getShape(this.getLevel(), this.getBlockPos()).move(x * SLOT_SIZE, y * SLOT_SIZE, z * SLOT_SIZE);
     }
 
     private static VoxelShape slotShape(int x, int y, int z) {
-        double cell = 1.0D / SIZE;
-        return Shapes.box(x * cell, y * cell, z * cell, (x + 1) * cell, (y + 1) * cell, (z + 1) * cell);
+        return Shapes.box(x * SLOT_SIZE, y * SLOT_SIZE, z * SLOT_SIZE, (x + 1) * SLOT_SIZE, (y + 1) * SLOT_SIZE, (z + 1) * SLOT_SIZE);
     }
 
     /* --------------------------------------------------------------------- */
@@ -376,22 +365,26 @@ public class StateStoreBlockEntity extends BlockEntity {
             return InteractionResult.FAIL;
         }
 
+        StoreReservations reservations = new StoreReservations();
         for (AxisSegment xSegment : xSegments) {
             for (AxisSegment ySegment : ySegments) {
                 for (AxisSegment zSegment : zSegments) {
-                    StateStoreBlockEntity targetStore = this;
-                    if (!(xSegment.offset == 0 && ySegment.offset == 0 && zSegment.offset == 0)) {
-                        BlockPos targetPos = worldPosition.offset(xSegment.offset, ySegment.offset, zSegment.offset);
-                        targetStore = getOrCreateStore(targetPos);
-                        if (targetStore == null) {
-                            return InteractionResult.FAIL;
-                        }
+                    BlockPos targetPos = worldPosition.offset(xSegment.offset, ySegment.offset, zSegment.offset);
+                    StoreReservation reservation = xSegment.offset == 0 && ySegment.offset == 0 && zSegment.offset == 0
+                            ? new StoreReservation(targetPos, this, null)
+                            : reservations.getOrReserve(targetPos);
+                    if (reservation == null) {
+                        return InteractionResult.FAIL;
                     }
-                    if (!areSlotsFree(targetStore, xSegment, ySegment, zSegment)) {
+                    if (reservation.store != null && !areSlotsFree(reservation.store, xSegment, ySegment, zSegment)) {
                         return InteractionResult.FAIL;
                     }
                 }
             }
+        }
+
+        if (!reservations.ensureCreated(this.level)) {
+            return InteractionResult.FAIL;
         }
 
         placeAt(x, y, z, state);
@@ -403,7 +396,7 @@ public class StateStoreBlockEntity extends BlockEntity {
                         continue;
                     }
                     BlockPos targetPos = worldPosition.offset(xSegment.offset, ySegment.offset, zSegment.offset);
-                    StateStoreBlockEntity targetStore = getOrCreateStore(targetPos);
+                    StateStoreBlockEntity targetStore = reservations.getStore(targetPos);
                     if (targetStore != null) {
                         targetStore.markSlotsOccupied(xSegment, ySegment, zSegment);
                     }
@@ -416,11 +409,7 @@ public class StateStoreBlockEntity extends BlockEntity {
 
     private int getStepForSize(double min, double max) {
         double size = max - min;
-        double slotSize = 1.0 / SIZE;
-        if (size % slotSize != 0) {
-            throw new IllegalArgumentException("Block size must be a multiple of 0.25");
-        }
-        return (int) (size / slotSize);
+        return sizeToSlots(size);
     }
 
     private AxisSegment[] getAxisSegments(int start, int step) {
@@ -467,14 +456,14 @@ public class StateStoreBlockEntity extends BlockEntity {
             z -= SIZE;
         }
         if (offsetX == 0 && offsetY == 0 && offsetZ == 0) {
-            return new PlacementTarget(this, x, y, z);
+            return new PlacementTarget(this, worldPosition, x, y, z);
         }
         BlockPos targetPos = worldPosition.offset(offsetX, offsetY, offsetZ);
-        StateStoreBlockEntity targetStore = getOrCreateStore(targetPos);
-        if (targetStore == null) {
+        StateStoreBlockEntity targetStore = getExistingStore(targetPos);
+        if (targetStore == null && !canCreateStore(targetPos)) {
             return null;
         }
-        return new PlacementTarget(targetStore, x, y, z);
+        return new PlacementTarget(targetStore, targetPos, x, y, z);
     }
 
     private boolean areSlotsFree(StateStoreBlockEntity targetStore, AxisSegment xSegment, AxisSegment ySegment, AxisSegment zSegment) {
@@ -504,23 +493,87 @@ public class StateStoreBlockEntity extends BlockEntity {
         }
     }
 
-    private StateStoreBlockEntity getOrCreateStore(BlockPos pos) {
+    private StateStoreBlockEntity getExistingStore(BlockPos pos) {
         if (this.level == null) {
             return null;
         }
         BlockEntity entity = this.level.getBlockEntity(pos);
-        if (entity instanceof StateStoreBlockEntity store) {
-            return store;
+        return entity instanceof StateStoreBlockEntity store ? store : null;
+    }
+
+    private boolean canCreateStore(BlockPos pos) {
+        if (this.level == null) {
+            return false;
+        }
+        BlockEntity entity = this.level.getBlockEntity(pos);
+        if (entity != null) {
+            return false;
         }
         BlockState state = this.level.getBlockState(pos);
-        if (!state.canBeReplaced()) {
+        return state.canBeReplaced();
+    }
+
+    private StoreReservation createStore(BlockPos pos) {
+        if (this.level == null) {
+            return null;
+        }
+        BlockState previousState = this.level.getBlockState(pos);
+        if (!previousState.canBeReplaced() || this.level.getBlockEntity(pos) != null) {
             return null;
         }
         if (!this.level.setBlock(pos, BlockParts.STATE_STORE_BLOCK.get().defaultBlockState(), 11)) {
             return null;
         }
         BlockEntity newEntity = this.level.getBlockEntity(pos);
-        return newEntity instanceof StateStoreBlockEntity store ? store : null;
+        if (newEntity instanceof StateStoreBlockEntity store) {
+            return new StoreReservation(pos, store, previousState);
+        }
+        this.level.setBlock(pos, previousState, 11);
+        return null;
+    }
+
+    private InteractionResult placeWithTarget(PlacementTarget target, BlockState state, VoxelShape voxelShape) {
+        StateStoreBlockEntity targetStore = target.store;
+        StoreReservation created = null;
+        if (targetStore == null) {
+            created = createStore(target.pos);
+            if (created == null) {
+                return InteractionResult.FAIL;
+            }
+            targetStore = created.store;
+        }
+        InteractionResult result = targetStore.placeWithOverflow(state, voxelShape, target.x, target.y, target.z);
+        if (result != InteractionResult.SUCCESS && created != null && this.level != null) {
+            this.level.setBlock(created.pos, created.previousState, 11);
+        }
+        return result;
+    }
+
+    private static Vec3 clampClickPos(Vec3 clickPos) {
+        return new Vec3(
+                clampCoord(clickPos.x),
+                clampCoord(clickPos.y),
+                clampCoord(clickPos.z)
+        );
+    }
+
+    private static double clampCoord(double value) {
+        if (value < EPSILON) {
+            return EPSILON;
+        }
+        if (value > 1.0D - EPSILON) {
+            return 1.0D - EPSILON;
+        }
+        return value;
+    }
+
+    private static int sizeToSlots(double size) {
+        double slotsExact = size / SLOT_SIZE;
+        int slots = (int) Math.round(slotsExact);
+        if (Math.abs(slotsExact - slots) > 1.0E-5D) {
+            throw new IllegalArgumentException("Block size must be a multiple of 0.25");
+        }
+        return slots;
     }
 
     private static class AxisSegment {
@@ -537,15 +590,88 @@ public class StateStoreBlockEntity extends BlockEntity {
 
     private static class PlacementTarget {
         private final StateStoreBlockEntity store;
+        private final BlockPos pos;
         private final int x;
         private final int y;
         private final int z;
 
-        private PlacementTarget(StateStoreBlockEntity store, int x, int y, int z) {
+        private PlacementTarget(StateStoreBlockEntity store, BlockPos pos, int x, int y, int z) {
             this.store = store;
+            this.pos = pos;
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+    }
+
+    private static class StoreReservation {
+        private final BlockPos pos;
+        private final StateStoreBlockEntity store;
+        private final BlockState previousState;
+
+        private StoreReservation(BlockPos pos, StateStoreBlockEntity store, BlockState previousState) {
+            this.pos = pos;
+            this.store = store;
+            this.previousState = previousState;
+        }
+    }
+
+    private class StoreReservations {
+        private final java.util.Map<BlockPos, StoreReservation> reservations = new java.util.HashMap<>();
+        private final java.util.List<StoreReservation> created = new java.util.ArrayList<>();
+
+        private StoreReservation getOrReserve(BlockPos pos) {
+            if (pos.equals(worldPosition)) {
+                return new StoreReservation(pos, StateStoreBlockEntity.this, null);
+            }
+            StoreReservation existing = reservations.get(pos);
+            if (existing != null) {
+                return existing;
+            }
+            StateStoreBlockEntity store = getExistingStore(pos);
+            if (store != null) {
+                StoreReservation reservation = new StoreReservation(pos, store, null);
+                reservations.put(pos, reservation);
+                return reservation;
+            }
+            if (!canCreateStore(pos)) {
+                return null;
+            }
+            StoreReservation reservation = new StoreReservation(pos, null, null);
+            reservations.put(pos, reservation);
+            return reservation;
+        }
+
+        private boolean ensureCreated(net.minecraft.world.level.Level level) {
+            for (StoreReservation reservation : reservations.values()) {
+                if (reservation.store != null) {
+                    continue;
+                }
+                StoreReservation createdStore = createStore(reservation.pos);
+                if (createdStore == null) {
+                    rollback(level);
+                    return false;
+                }
+                created.add(createdStore);
+                reservations.put(reservation.pos, createdStore);
+            }
+            return true;
+        }
+
+        private StateStoreBlockEntity getStore(BlockPos pos) {
+            StoreReservation reservation = reservations.get(pos);
+            if (reservation == null) {
+                return null;
+            }
+            return reservation.store;
+        }
+
+        private void rollback(net.minecraft.world.level.Level level) {
+            for (int i = created.size() - 1; i >= 0; i--) {
+                StoreReservation reservation = created.get(i);
+                level.setBlock(reservation.pos, reservation.previousState, 11);
+            }
+            created.clear();
         }
     }
 
