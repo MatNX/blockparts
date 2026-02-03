@@ -20,7 +20,7 @@ public class TileBlock extends PartBlock {
     public TileBlock(int sizeX, int sizeY, int sizeZ, BlockBehaviour.Properties props) {
         super(sizeX, sizeY, sizeZ, props);
         this.registerDefaultState(this.stateDefinition.any()
-                .setValue(FACING, Direction.NORTH));
+                .setValue(FACING, Direction.UP));
     }
 
     @Override
@@ -32,7 +32,7 @@ public class TileBlock extends PartBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState()
-                .setValue(FACING, context.getHorizontalDirection().getOpposite());
+                .setValue(FACING, context.getClickedFace().getOpposite());
     }
 
     @Override
