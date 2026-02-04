@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/spruce_cube_y"
-      }
-    }
-  ]
-}

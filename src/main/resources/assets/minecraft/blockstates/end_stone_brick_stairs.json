@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/end_stone_brick_cube_y"
-      }
-    }
-  ]
-}

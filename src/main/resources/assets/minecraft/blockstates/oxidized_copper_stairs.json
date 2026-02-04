@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/oxidized_copper_cube_y"
-      }
-    }
-  ]
-}

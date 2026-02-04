@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/cobbled_deepslate_cube_y"
-      }
-    }
-  ]
-}
