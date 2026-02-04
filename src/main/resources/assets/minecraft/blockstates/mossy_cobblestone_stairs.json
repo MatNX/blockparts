@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/mossy_cobblestone_cube_y"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/crimson_cube_y"
+      }
+    }
+  ]
+}

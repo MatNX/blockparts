@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/waxed_exposed_copper_cube_y"
+      }
+    }
+  ]
+}

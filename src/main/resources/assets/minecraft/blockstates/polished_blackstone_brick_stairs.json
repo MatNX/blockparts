@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/polished_blackstone_brick_cube_y"
+      }
+    }
+  ]
+}

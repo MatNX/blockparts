@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/bamboo_mosaic_cube_y"
+      }
+    }
+  ]
+}
