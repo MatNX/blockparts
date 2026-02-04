@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/acacia_cube_y"
+      }
+    }
+  ]
+}

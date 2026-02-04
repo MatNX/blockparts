@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/andesite_cube_y"
+      }
+    }
+  ]
+}

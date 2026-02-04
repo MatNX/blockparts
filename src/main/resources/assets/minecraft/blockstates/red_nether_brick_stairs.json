@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/red_nether_brick_cube_y"
+      }
+    }
+  ]
+}

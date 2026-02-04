@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/quartz_cube_y"
+      }
+    }
+  ]
+}

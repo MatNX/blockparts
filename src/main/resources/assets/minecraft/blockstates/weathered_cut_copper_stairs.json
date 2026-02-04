@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/weathered_cut_copper_cube_y"
+      }
+    }
+  ]
+}

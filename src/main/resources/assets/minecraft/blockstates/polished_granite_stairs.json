@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/polished_granite_cube_y"
+      }
+    }
+  ]
+}

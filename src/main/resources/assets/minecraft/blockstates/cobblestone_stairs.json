@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/cobblestone_cube_y"
+      }
+    }
+  ]
+}
