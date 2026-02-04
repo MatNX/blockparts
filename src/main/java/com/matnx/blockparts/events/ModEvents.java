@@ -51,12 +51,16 @@ public class ModEvents {
         if (held.isEmpty() || !(held.getItem() instanceof BlockItem blockItem)) return;
 
         BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(event.getEntity(), event.getHand(), event.getHitVec()));
-        BlockState toPlace = blockItem.getBlock().getStateForPlacement(context);
+        BlockState originalState = blockItem.getBlock().getStateForPlacement(context);
+        if (originalState == null) {
+            return;
+        }
+        BlockState toPlace = BlockParts.getStateStorePlacementState(blockItem.getBlock(), context, originalState);
         InteractionResult result = store.tryAddBlock(toPlace, event.getHitVec(), event.getEntity(), event.getHand());
 
         if (!result.consumesAction()) return;
 
-        SoundType soundtype = toPlace.getSoundType(level, targetPos, event.getEntity());
+        SoundType soundtype = originalState.getSoundType(level, targetPos, event.getEntity());
         level.playSound(event.getEntity(), targetPos, soundtype.getPlaceSound(), SoundSource.BLOCKS,
                 (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
 
@@ -64,7 +68,7 @@ public class ModEvents {
             CriteriaTriggers.PLACED_BLOCK.trigger(serverPlayer, targetPos, held);
         }
 
-        level.gameEvent(GameEvent.BLOCK_PLACE, targetPos, GameEvent.Context.of(event.getEntity(), toPlace));
+        level.gameEvent(GameEvent.BLOCK_PLACE, targetPos, GameEvent.Context.of(event.getEntity(), originalState));
 
         if (!event.getEntity().getAbilities().instabuild) {
             held.shrink(1);
