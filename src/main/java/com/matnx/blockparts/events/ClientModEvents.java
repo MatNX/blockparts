@@ -2,6 +2,7 @@ package com.matnx.blockparts.events;
 
 import com.matnx.blockparts.statestore.StateStoreBlockEntityRenderer;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -24,7 +25,7 @@ public class ClientModEvents {
     private static void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             for (DeferredBlock<Block> block : PART_BLOCKS.values()) {
-                event.accept(block.get());
+                    event.accept(block.get());
             }
         }
     }
