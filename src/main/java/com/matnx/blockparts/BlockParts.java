@@ -157,7 +157,7 @@ public class BlockParts
         if (cubeBlock == null) {
             return false;
         }
-        return replaceWithCubes(level, pos, stairState, cubeBlock.get().defaultBlockState());
+        return replaceWithParts(level, pos, stairState, cubeBlock.get().defaultBlockState());
     }
 
     public static boolean replaceSlabWithStateStore(LevelAccessor level, BlockPos pos, BlockState slabState) {
@@ -177,14 +177,14 @@ public class BlockParts
             return false;
         }
         String material = path.substring(0, path.length() - "_slab".length());
-        DeferredBlock<Block> cubeBlock = PART_BLOCKS.get(material + "_cube");
-        if (cubeBlock == null) {
+        DeferredBlock<Block> slabPart = PART_BLOCKS.get(material + "_small_slab");
+        if (slabPart == null) {
             return false;
         }
-        return replaceWithCubes(level, pos, slabState, cubeBlock.get().defaultBlockState());
+        return replaceWithParts(level, pos, slabState, slabPart.get().defaultBlockState());
     }
 
-    private static boolean replaceWithCubes(LevelAccessor level, BlockPos pos, BlockState sourceState, BlockState cubeState) {
+    private static boolean replaceWithParts(LevelAccessor level, BlockPos pos, BlockState sourceState, BlockState partState) {
         if (!level.setBlock(pos, STATE_STORE_BLOCK.get().defaultBlockState(), 11)) {
             return false;
         }
@@ -202,7 +202,7 @@ public class BlockParts
                     double minZ = z * cell;
                     VoxelShape cellShape = Shapes.box(minX, minY, minZ, minX + cell, minY + cell, minZ + cell);
                     if (Shapes.joinIsNotEmpty(sourceShape, cellShape, BooleanOp.AND)) {
-                        store.placeAt(x, y, z, cubeState);
+                        store.placeAt(x, y, z, partState);
                     }
                 }
             }
