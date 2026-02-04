@@ -2,33 +2,30 @@ package com.matnx.blockparts;
 
 import com.matnx.blockparts.part.PartBlock;
 import com.matnx.blockparts.part.TileBlock;
-import com.matnx.blockparts.statestore.StateStoreAssembler;
 import com.matnx.blockparts.statestore.StateStoreBlock;
 import com.matnx.blockparts.statestore.StateStoreBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.*;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.minecraft.world.level.Level;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(BlockParts.MODID)
@@ -104,14 +101,8 @@ public class BlockParts
 
     @Nullable
     public static BlockState getStateStorePlacementState(Block block, BlockPlaceContext context, BlockState originalState) {
-        if (block instanceof SlabBlock) {
-            BlockState slabState = getPartStateForBlock(block, "small_slab", context.getClickedFace().getAxis());
-            if (slabState != null) {
-                return slabState;
-            }
-        }
         if (block instanceof StairBlock) {
-            BlockState cubeState = getPartStateForBlock(block, "cube", Direction.Axis.Y);
+            BlockState cubeState = getCubeStateForStair(block, context);
             if (cubeState != null) {
                 return cubeState;
             }
@@ -120,66 +111,21 @@ public class BlockParts
     }
 
     @Nullable
-    private static BlockState getPartStateForBlock(Block block, String partKey, Direction.Axis axis) {
-        String material = getMaterialFromBlock(block);
-        if (material == null) {
-            return null;
-        }
-        DeferredBlock<Block> partBlock = PART_BLOCKS.get(material + "_" + partKey);
-        if (partBlock == null) {
-            return null;
-        }
-        BlockState partState = partBlock.get().defaultBlockState();
-        if (partState.hasProperty(BlockStateProperties.AXIS)) {
-            partState = partState.setValue(BlockStateProperties.AXIS, axis);
-        }
-        return partState;
-    }
-
-    @Nullable
-    private static String getMaterialFromBlock(Block block) {
+    private static BlockState getCubeStateForStair(Block block, BlockPlaceContext context) {
         ResourceLocation key = BuiltInRegistries.BLOCK.getKey(block);
         if (key == null) {
             return null;
         }
         String path = key.getPath();
-        if (path.endsWith("_stairs")) {
-            return path.substring(0, path.length() - "_stairs".length());
+        if (!path.endsWith("_stairs")) {
+            return null;
         }
-        if (path.endsWith("_slab")) {
-            return path.substring(0, path.length() - "_slab".length());
+        String material = path.substring(0, path.length() - "_stairs".length());
+        DeferredBlock<Block> cubeBlock = PART_BLOCKS.get(material + "_cube");
+        if (cubeBlock == null) {
+            return null;
         }
-        return null;
-    }
-
-    public static boolean hasReplacementParts(String material) {
-        return PART_BLOCKS.containsKey(material + "_small_slab")
-                && PART_BLOCKS.containsKey(material + "_brick")
-                && PART_BLOCKS.containsKey(material + "_cube");
-    }
-
-    public static void replaceWithStateStore(Level level, BlockPos pos, BlockState originalState) {
-        if (level.isClientSide) {
-            return;
-        }
-        String material = getMaterialFromBlock(originalState.getBlock());
-        if (material == null || !hasReplacementParts(material)) {
-            return;
-        }
-        BlockState slabState = getPartStateForBlock(originalState.getBlock(), "small_slab", Direction.Axis.Y);
-        BlockState brickState = getPartStateForBlock(originalState.getBlock(), "brick", Direction.Axis.Y);
-        BlockState cubeState = getPartStateForBlock(originalState.getBlock(), "cube", Direction.Axis.Y);
-        if (slabState == null || brickState == null || cubeState == null) {
-            return;
-        }
-        BlockState stateStore = STATE_STORE_BLOCK.get().defaultBlockState();
-        if (!level.setBlock(pos, stateStore, 11)) {
-            return;
-        }
-        StateStoreBlockEntity store = level.getBlockEntity(pos) instanceof StateStoreBlockEntity entity ? entity : null;
-        if (store == null) {
-            return;
-        }
-        StateStoreAssembler.fillFromShape(store, originalState, level, pos, slabState, brickState, cubeState);
+        BlockState cubeState = cubeBlock.get().getStateForPlacement(context);
+        return cubeState != null ? cubeState : cubeBlock.get().defaultBlockState();
     }
 }
