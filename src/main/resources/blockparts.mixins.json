@@ -3,7 +3,10 @@
   "package": "com.matnx.blockparts.mixin",
   "compatibilityLevel": "JAVA_21",
   "refmap": "blockparts.refmap.json",
-  "mixins": [],
+  "mixins": [
+    "MixinBlockItem",
+    "MixinSlabBlock"
+  ],
   "client": [
   ],
   "minVersion": "0.8",
