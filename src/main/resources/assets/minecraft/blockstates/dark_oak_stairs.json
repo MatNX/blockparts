@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/dark_oak_cube_y"
+      }
+    }
+  ]
+}

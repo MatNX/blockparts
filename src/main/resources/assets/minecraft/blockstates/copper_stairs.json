@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/copper_cube_y"
+      }
+    }
+  ]
+}

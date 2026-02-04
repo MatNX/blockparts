@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/prismarine_cube_y"
+      }
+    }
+  ]
+}

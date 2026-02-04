@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/blackstone_cube_y"
+      }
+    }
+  ]
+}
