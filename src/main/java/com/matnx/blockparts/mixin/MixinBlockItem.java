@@ -1,5 +1,6 @@
 package com.matnx.blockparts.mixin;
 
+import com.matnx.blockparts.BlockParts;
 import com.matnx.blockparts.statestore.StateStoreBlockEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -7,6 +8,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.Level;
@@ -39,11 +41,18 @@ public abstract class MixinBlockItem {
         ItemStack stack = context.getItemInHand();
 
         // Redirect placement for slabs and custom part blocks
-        if (block instanceof net.minecraft.world.level.block.SlabBlock || block instanceof com.matnx.blockparts.part.PartBlock) {
+        if (block instanceof net.minecraft.world.level.block.SlabBlock
+                || block instanceof com.matnx.blockparts.part.PartBlock
+                || block instanceof StairBlock) {
             Level level = context.getLevel();
             BlockPos pos = context.getClickedPos();
             Player player = context.getPlayer();
             BlockState originalState = block.getStateForPlacement(context);
+            if (originalState == null) {
+                cir.setReturnValue(InteractionResult.FAIL);
+                return;
+            }
+            BlockState placementState = BlockParts.getStateStorePlacementState(block, context, originalState);
             BlockState customState = STATE_STORE_BLOCK.get().defaultBlockState();
 
             if (!context.canPlace()) {
@@ -54,7 +63,7 @@ public abstract class MixinBlockItem {
             BlockEntity existingEntity = level.getBlockEntity(pos);
             if (existingEntity instanceof StateStoreBlockEntity stateStore) {
                 InteractionResult addResult = stateStore.tryAddBlock(
-                        originalState,
+                        placementState,
                         new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside()),
                         context.getPlayer(),
                         context.getHand()
@@ -64,7 +73,7 @@ public abstract class MixinBlockItem {
                     cir.setReturnValue(InteractionResult.SUCCESS);
                     return;
                 }
-                InteractionResult adjacentResult = tryPlaceInAdjacent(level, context, originalState, stack);
+                InteractionResult adjacentResult = tryPlaceInAdjacent(level, context, originalState, placementState, stack);
                 cir.setReturnValue(adjacentResult);
                 return;
             }
@@ -79,7 +88,7 @@ public abstract class MixinBlockItem {
                 BlockEntity be = level.getBlockEntity(pos);
                 if (be instanceof StateStoreBlockEntity stateStore) {
                     InteractionResult addResult = stateStore.tryAddBlock(
-                            originalState,
+                            placementState,
                             new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside()),
                             context.getPlayer(),
                             context.getHand()
@@ -109,7 +118,7 @@ public abstract class MixinBlockItem {
         stack.consume(1, player);
     }
 
-    private InteractionResult tryPlaceInAdjacent(Level level, BlockPlaceContext context, BlockState originalState, ItemStack stack) {
+    private InteractionResult tryPlaceInAdjacent(Level level, BlockPlaceContext context, BlockState originalState, BlockState placementState, ItemStack stack) {
         BlockPos adjacentPos = context.getClickedPos().relative(context.getClickedFace());
         Player player = context.getPlayer();
         BlockState adjacentState = level.getBlockState(adjacentPos);
@@ -123,7 +132,7 @@ public abstract class MixinBlockItem {
                     context.isInside()
             );
             InteractionResult addResult = adjacentStore.tryAddBlock(
-                    originalState,
+                    placementState,
                     adjacentHit,
                     context.getPlayer(),
                     context.getHand()
@@ -133,7 +142,7 @@ public abstract class MixinBlockItem {
                 return InteractionResult.SUCCESS;
             }
             InteractionResult surfaceResult = adjacentStore.tryAddBlockOnSurface(
-                    originalState,
+                    placementState,
                     adjacentHit,
                     context.getPlayer(),
                     context.getHand()
@@ -167,7 +176,7 @@ public abstract class MixinBlockItem {
                 context.isInside()
         );
 
-        InteractionResult addResult = stateStore.tryAddBlock(originalState, adjacentHit, context.getPlayer(), context.getHand());
+        InteractionResult addResult = stateStore.tryAddBlock(placementState, adjacentHit, context.getPlayer(), context.getHand());
         if (addResult == InteractionResult.SUCCESS) {
             finalizePlacement(level, adjacentPos, player, stack, originalState);
             return InteractionResult.SUCCESS;

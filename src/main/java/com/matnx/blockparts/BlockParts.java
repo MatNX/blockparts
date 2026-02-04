@@ -4,15 +4,20 @@ import com.matnx.blockparts.part.PartBlock;
 import com.matnx.blockparts.part.TileBlock;
 import com.matnx.blockparts.statestore.StateStoreBlock;
 import com.matnx.blockparts.statestore.StateStoreBlockEntity;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.*;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -20,6 +25,7 @@ import net.neoforged.fml.common.Mod;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(BlockParts.MODID)
@@ -91,5 +97,35 @@ public class BlockParts
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
+    }
+
+    @Nullable
+    public static BlockState getStateStorePlacementState(Block block, BlockPlaceContext context, BlockState originalState) {
+        if (block instanceof StairBlock) {
+            BlockState cubeState = getCubeStateForStair(block, context);
+            if (cubeState != null) {
+                return cubeState;
+            }
+        }
+        return originalState;
+    }
+
+    @Nullable
+    private static BlockState getCubeStateForStair(Block block, BlockPlaceContext context) {
+        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(block);
+        if (key == null) {
+            return null;
+        }
+        String path = key.getPath();
+        if (!path.endsWith("_stairs")) {
+            return null;
+        }
+        String material = path.substring(0, path.length() - "_stairs".length());
+        DeferredBlock<Block> cubeBlock = PART_BLOCKS.get(material + "_cube");
+        if (cubeBlock == null) {
+            return null;
+        }
+        BlockState cubeState = cubeBlock.get().getStateForPlacement(context);
+        return cubeState != null ? cubeState : cubeBlock.get().defaultBlockState();
     }
 }
