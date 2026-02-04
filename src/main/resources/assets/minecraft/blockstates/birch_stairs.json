@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blockparts:block/birch_cube_y"
+      }
+    }
+  ]
+}
