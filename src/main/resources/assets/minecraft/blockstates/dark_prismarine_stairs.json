@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/dark_prismarine_cube_y"
-      }
-    }
-  ]
-}

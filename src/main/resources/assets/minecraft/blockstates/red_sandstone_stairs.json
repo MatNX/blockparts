@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/red_sandstone_cube_y"
-      }
-    }
-  ]
-}

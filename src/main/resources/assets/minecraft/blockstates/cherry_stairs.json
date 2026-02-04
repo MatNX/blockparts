@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/cherry_cube_y"
-      }
-    }
-  ]
-}

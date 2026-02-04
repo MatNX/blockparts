@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/polished_andesite_cube_y"
-      }
-    }
-  ]
-}

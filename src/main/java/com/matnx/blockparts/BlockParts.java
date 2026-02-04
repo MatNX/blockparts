@@ -87,9 +87,7 @@ public class BlockParts
                                 : new PartBlock(s[0], s[1], s[2], props)),
                         BlockBehaviour.Properties.of());
                 PART_BLOCKS.put(name, block);
-                if (!"cube".equals(entry.getKey())) {
-                    ITEMS.registerSimpleBlockItem(name, block, new Item.Properties());
-                }
+                ITEMS.registerSimpleBlockItem(name, block, new Item.Properties());
             }
         }
     }
