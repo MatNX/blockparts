@@ -8,7 +8,6 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.Level;
@@ -40,10 +39,8 @@ public abstract class MixinBlockItem {
     private void redirectSlab(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack stack = context.getItemInHand();
 
-        // Redirect placement for slabs and custom part blocks
-        if (block instanceof net.minecraft.world.level.block.SlabBlock
-                || block instanceof com.matnx.blockparts.part.PartBlock
-                || block instanceof StairBlock) {
+        // Redirect placement for custom part blocks
+        if (block instanceof com.matnx.blockparts.part.PartBlock) {
             Level level = context.getLevel();
             BlockPos pos = context.getClickedPos();
             Player player = context.getPlayer();
