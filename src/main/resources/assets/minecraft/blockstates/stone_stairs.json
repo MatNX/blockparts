@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/stone_cube_y"
-      }
-    }
-  ]
-}

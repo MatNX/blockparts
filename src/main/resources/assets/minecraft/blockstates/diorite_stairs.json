@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/diorite_cube_y"
-      }
-    }
-  ]
-}

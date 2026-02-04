@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/exposed_cut_copper_cube_y"
-      }
-    }
-  ]
-}

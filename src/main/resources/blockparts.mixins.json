@@ -5,8 +5,7 @@
   "refmap": "blockparts.refmap.json",
   "mixins": [
     "MixinBlockItem",
-    "MixinSlabBlock",
-    "MixinStairBlock"
+    "MixinSlabBlock"
   ],
   "client": [
   ],
