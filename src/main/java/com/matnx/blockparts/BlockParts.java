@@ -15,20 +15,13 @@ import net.neoforged.neoforge.registries.*;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -50,7 +43,6 @@ public class BlockParts
     private static final Map<String, int[]> PART_SIZES = Map.of(
             "brick", new int[]{8, 16, 8},
             "cube", new int[]{8, 8, 8},
-            "slab", new int[]{16, 8, 16},
             "small_slab", new int[]{8, 4, 8},
             "small_brick", new int[]{4, 8, 4},
             "small_cube", new int[]{4, 4, 4},
@@ -135,79 +127,5 @@ public class BlockParts
         }
         BlockState cubeState = cubeBlock.get().getStateForPlacement(context);
         return cubeState != null ? cubeState : cubeBlock.get().defaultBlockState();
-    }
-
-    public static boolean replaceStairWithStateStore(LevelAccessor level, BlockPos pos, BlockState stairState) {
-        if (level.isClientSide()) {
-            return false;
-        }
-        Block stairBlock = stairState.getBlock();
-        if (!(stairBlock instanceof StairBlock)) {
-            return false;
-        }
-        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(stairBlock);
-        if (key == null) {
-            return false;
-        }
-        String path = key.getPath();
-        if (!path.endsWith("_stairs")) {
-            return false;
-        }
-        String material = path.substring(0, path.length() - "_stairs".length());
-        DeferredBlock<Block> cubeBlock = PART_BLOCKS.get(material + "_cube");
-        if (cubeBlock == null) {
-            return false;
-        }
-        return replaceWithParts(level, pos, stairState, cubeBlock.get().defaultBlockState());
-    }
-
-    public static boolean replaceSlabWithStateStore(LevelAccessor level, BlockPos pos, BlockState slabState) {
-        if (level.isClientSide()) {
-            return false;
-        }
-        Block slabBlock = slabState.getBlock();
-        if (!(slabBlock instanceof SlabBlock)) {
-            return false;
-        }
-        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(slabBlock);
-        if (key == null) {
-            return false;
-        }
-        String path = key.getPath();
-        if (!path.endsWith("_slab")) {
-            return false;
-        }
-        String material = path.substring(0, path.length() - "_slab".length());
-        DeferredBlock<Block> slabPart = PART_BLOCKS.get(material + "_slab");
-        if (slabPart == null) {
-            return false;
-        }
-        return replaceWithParts(level, pos, slabState, slabPart.get().defaultBlockState());
-    }
-
-    private static boolean replaceWithParts(LevelAccessor level, BlockPos pos, BlockState sourceState, BlockState partState) {
-        if (!level.setBlock(pos, STATE_STORE_BLOCK.get().defaultBlockState(), 11)) {
-            return false;
-        }
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof StateStoreBlockEntity store)) {
-            return false;
-        }
-        VoxelShape sourceShape = sourceState.getShape(level, pos);
-        double cell = 1.0D / 4.0D;
-        for (int x = 0; x < 4; x++) {
-            for (int y = 0; y < 4; y++) {
-                for (int z = 0; z < 4; z++) {
-                    double minX = x * cell;
-                    double minY = y * cell;
-                    double minZ = z * cell;
-                    VoxelShape cellShape = Shapes.box(minX, minY, minZ, minX + cell, minY + cell, minZ + cell);
-                    if (Shapes.joinIsNotEmpty(sourceShape, cellShape, BooleanOp.AND)) {
-                        store.placeAt(x, y, z, partState);
-                    }
-                }
-            }
-        }
-        return true;
     }
 }
