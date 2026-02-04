@@ -50,6 +50,7 @@ public class BlockParts
     private static final Map<String, int[]> PART_SIZES = Map.of(
             "brick", new int[]{8, 16, 8},
             "cube", new int[]{8, 8, 8},
+            "slab", new int[]{16, 8, 16},
             "small_slab", new int[]{8, 4, 8},
             "small_brick", new int[]{4, 8, 4},
             "small_cube", new int[]{4, 4, 4},
@@ -177,7 +178,7 @@ public class BlockParts
             return false;
         }
         String material = path.substring(0, path.length() - "_slab".length());
-        DeferredBlock<Block> slabPart = PART_BLOCKS.get(material + "_small_slab");
+        DeferredBlock<Block> slabPart = PART_BLOCKS.get(material + "_slab");
         if (slabPart == null) {
             return false;
         }
