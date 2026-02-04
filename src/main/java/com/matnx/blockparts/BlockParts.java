@@ -112,16 +112,6 @@ public class BlockParts
 
     @Nullable
     private static BlockState getCubeStateForStair(Block block, BlockPlaceContext context) {
-        Block cubeBlock = getCubeBlockForStair(block);
-        if (cubeBlock == null) {
-            return null;
-        }
-        BlockState cubeState = cubeBlock.getStateForPlacement(context);
-        return cubeState != null ? cubeState : cubeBlock.defaultBlockState();
-    }
-
-    @Nullable
-    public static Block getCubeBlockForStair(Block block) {
         ResourceLocation key = BuiltInRegistries.BLOCK.getKey(block);
         if (key == null) {
             return null;
@@ -135,6 +125,7 @@ public class BlockParts
         if (cubeBlock == null) {
             return null;
         }
-        return cubeBlock.get();
+        BlockState cubeState = cubeBlock.get().getStateForPlacement(context);
+        return cubeState != null ? cubeState : cubeBlock.get().defaultBlockState();
     }
 }

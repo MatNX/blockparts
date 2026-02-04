@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-        "model": "blockparts:block/weathered_copper_cube_y"
-      }
-    }
-  ]
-}
